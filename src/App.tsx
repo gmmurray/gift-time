@@ -1,26 +1,25 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useLocation, useRoutes } from 'react-router';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+import { Auth } from '@supabase/ui';
+import DataLoadingSpinner from './components/shared/DataLoadingSpinner';
+import { Fragment } from 'react';
+import { getRoutes } from './utils/routing/routes';
+import { useAppContext } from './utils/contexts/appContext';
+
+const App = () => {
+    const location = useLocation();
+    const { user } = Auth.useUser();
+    const appContext = useAppContext();
+
+    const isAuthenticated = !!user;
+    const isRegistered = !!appContext?.user.profile;
+
+    const routing = useRoutes(
+        getRoutes(isAuthenticated, isRegistered, location),
+    );
+    if (appContext?.user.loading ?? true)
+        return <DataLoadingSpinner showBackground={false} />;
+    return <Fragment>{routing}</Fragment>;
+};
 
 export default App;
