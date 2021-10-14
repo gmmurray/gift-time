@@ -12,10 +12,7 @@ const AlertProvider: FC = ({ children }) => {
         <SnackbarProvider
             ref={alertStackRef}
             action={key => (
-                <Button
-                    color="secondary"
-                    onClick={() => handleDismissAlert(key)}
-                >
+                <Button color="inherit" onClick={() => handleDismissAlert(key)}>
                     dimiss
                 </Button>
             )}

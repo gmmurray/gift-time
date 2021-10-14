@@ -12,11 +12,8 @@ const App = () => {
     const appContext = useAppContext();
 
     const isAuthenticated = !!user;
-    const isRegistered = !!appContext?.user.profile;
 
-    const routing = useRoutes(
-        getRoutes(isAuthenticated, isRegistered, location),
-    );
+    const routing = useRoutes(getRoutes(isAuthenticated, location));
     if (appContext?.user.loading ?? true)
         return <DataLoadingSpinner showBackground={false} />;
     return <Fragment>{routing}</Fragment>;

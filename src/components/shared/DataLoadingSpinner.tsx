@@ -1,12 +1,15 @@
 import { CircularProgress, Grid, Paper } from '@mui/material';
 
 import { FC } from 'react';
+import { SxProps } from '@mui/system';
 
 type DataLoadingSpinnerProps = {
     showBackground?: boolean;
+    additionalSx?: SxProps;
 };
 
 const DataLoadingSpinner: FC<DataLoadingSpinnerProps> = ({
+    additionalSx,
     showBackground = true,
 }) => {
     return (
@@ -17,7 +20,7 @@ const DataLoadingSpinner: FC<DataLoadingSpinnerProps> = ({
             alignItems="center"
             direction="column"
             component={showBackground ? Paper : 'div'}
-            sx={{ minHeight: '50vh' }}
+            sx={{ ...additionalSx, minHeight: '50vh' }}
         >
             <Grid item xs={6}>
                 <CircularProgress />

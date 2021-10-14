@@ -3,6 +3,7 @@ import { FC, Fragment, useCallback, useState } from 'react';
 import { Container } from '@mui/material';
 import NavBar from './NavBar';
 import NavDrawer from './NavDrawer';
+import RegistrationWrapper from '../auth/RegistrationWrapper';
 import ScrollTopButton from './ScrollTopButton';
 import { supabaseClient } from '../../utils/config/supabase';
 import { useNavigate } from 'react-router';
@@ -29,10 +30,12 @@ const Layout: FC = ({ children }) => {
                 open={drawerOpen}
             />
             <main>
-                <Container maxWidth="xl">
-                    <Fragment>{children}</Fragment>
-                </Container>
-                <ScrollTopButton />
+                <RegistrationWrapper>
+                    <Container maxWidth="xl">
+                        <Fragment>{children}</Fragment>
+                    </Container>
+                    <ScrollTopButton />
+                </RegistrationWrapper>
             </main>
         </Fragment>
     );

@@ -1,8 +1,10 @@
-export interface UserProfile {
+import { DbEntity } from './DbEntity';
+
+export interface UserProfile extends DbEntity {
     user_id: string;
-    created_at: Date;
     display_name: string;
     avatar_url: string | null;
+    email: string;
 }
 
 export const UserProfilesTable = 'user_profiles';

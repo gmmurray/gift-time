@@ -19,6 +19,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import { styles } from './styles';
 import { supabaseClient } from '../../utils/config/supabase';
 import { useForm } from 'react-hook-form';
+import { useQuery } from '../../lib/hooks/useQuery';
 import { useSnackbar } from 'notistack';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -35,10 +36,12 @@ type ForgotPasswordForm = {
 
 const Login = () => {
     const location = useLocation();
+    const query = useQuery();
     let navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
+    const startWithSignUp = query.get('signup') === 'true';
 
-    const [isSignUp, setIsSignUp] = useState(false);
+    const [isSignUp, setIsSignUp] = useState(startWithSignUp);
     const [isForgotPassword, setIsForgotPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 

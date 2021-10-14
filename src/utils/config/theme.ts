@@ -1,3 +1,5 @@
+import type {} from '@mui/x-data-grid/themeAugmentation';
+
 import { createTheme } from '@mui/material';
 
 export const theme = createTheme({
@@ -12,14 +14,17 @@ export const theme = createTheme({
             default: '#e3e2df',
             paper: '#bab2b5',
         },
-        error: {
-            main: '#ffcccb',
-        },
-        success: {
-            main: '#a9ee91',
-        },
     },
     typography: {
         fontFamily: 'Raleway',
+    },
+    components: {
+        MuiDataGrid: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: '#e3e2df',
+                },
+            },
+        },
     },
 });

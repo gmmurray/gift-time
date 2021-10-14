@@ -24,6 +24,7 @@ export const useGetCurrentUserProfile = (user_id?: string) =>
     useQuery(getCurrentUserProfileKey, () => getUserProfile(user_id), {
         staleTime: defaultQueryCacheTime,
         enabled: !!user_id,
+        retry: 2,
     });
 //#endregion
 
@@ -60,4 +61,17 @@ export const useUpdateUserProfile = () =>
         onSuccess: () =>
             queryClient.invalidateQueries(getCurrentUserProfileKey),
     });
+//#endregion
+
+//#region other
+export const getUserProfileByEmail = async (email: string) => {
+    const { data, error } = await supabaseClient
+        .from<UserProfile>(UserProfilesTable)
+        .select()
+        .match({ email })
+        .single();
+
+    if (error) throw error.message;
+    return data;
+};
 //#endregion
