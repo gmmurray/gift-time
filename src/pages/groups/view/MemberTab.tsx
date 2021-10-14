@@ -16,7 +16,6 @@ import {
     useGetGroupMembersByGroup,
 } from '../../../domain/services/groupMemberService';
 
-import { Auth } from '@supabase/ui';
 import ClearIcon from '@mui/icons-material/Clear';
 import { defaultBgColor } from '../../../lib/constants/styles';
 import { formatDistanceToNow } from 'date-fns';
@@ -25,7 +24,6 @@ import { useParams } from 'react-router';
 import { useSnackbar } from 'notistack';
 
 const MemberTab = () => {
-    const { user } = Auth.useUser();
     const { group_id } = useParams();
     const { enqueueSnackbar } = useSnackbar();
     const { data, isLoading } = useGetGroupMembersByGroup(
@@ -70,7 +68,6 @@ const MemberTab = () => {
             return (
                 <Grid container rowSpacing={2} sx={{ mt: 1 }}>
                     {data.map(member => {
-                        const isGroupOwner = member.user_id === user?.id;
                         const avatar_url = member.user_profiles.avatar_url;
                         const avatarSrc =
                             !avatar_url || avatar_url === ''
@@ -84,6 +81,7 @@ const MemberTab = () => {
                                 container
                                 component={Paper}
                                 sx={{ bgcolor: defaultBgColor, mb: 1, pb: 1 }}
+                                key={member.group_member_id}
                             >
                                 <Grid item sx={{ ml: 1 }}>
                                     <Avatar src={avatarSrc} />
@@ -110,7 +108,7 @@ const MemberTab = () => {
                                     </Typography>
                                 </Grid>
                                 <Grid item sx={{ ml: 'auto' }}>
-                                    {isGroupOwner ? (
+                                    {member.is_owner ? (
                                         <Typography
                                             variant="body1"
                                             sx={{ mr: 1 }}

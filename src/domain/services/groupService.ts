@@ -2,7 +2,11 @@ import * as groupMemberService from './groupMemberService';
 
 import { Group, GroupsTable } from '../entities/Group';
 import { GroupInvite, GroupInvitesTable } from '../entities/GroupInvite';
-import { GroupMember, GroupMembersTable } from '../entities/GroupMember';
+import {
+    GroupMember,
+    GroupMemberWithGroup,
+    GroupMembersTable,
+} from '../entities/GroupMember';
 import { useMutation, useQuery } from 'react-query';
 
 import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime';
@@ -103,6 +107,28 @@ export const useGetOwnedGroups = (owner_id?: string) =>
         staleTime: defaultQueryCacheTime,
         enabled: !!owner_id,
     });
+
+export const getJoinedGroupsKey = 'get-joined-groups';
+const getJoinedGroups = async (user_id?: string) => {
+    if (!user_id) return [];
+
+    const { data: memberData, error: memberError } = await supabaseClient
+        .from<GroupMemberWithGroup>(GroupMembersTable)
+        .select('*, groups (*, user_profiles:owner_id (*))')
+        .match({ user_id, is_owner: false });
+
+    if (memberError) throw memberError.message;
+
+    if (!memberData || memberData.length === 0) return [];
+
+    return memberData.map(m => m.groups);
+};
+
+export const useGetJoinedGroups = (user_id?: string) =>
+    useQuery(getJoinedGroupsKey, () => getJoinedGroups(user_id), {
+        staleTime: defaultQueryCacheTime,
+        enabled: !!user_id,
+    });
 //#endregion
 
 //#region create
@@ -115,7 +141,7 @@ const createGroup = async (group: Partial<Group>) => {
 
     const { group_id, owner_id } = data![0];
 
-    await groupMemberService.createGroupMember(group_id, owner_id);
+    await groupMemberService.createGroupMember(group_id, owner_id, true);
 
     return data;
 };

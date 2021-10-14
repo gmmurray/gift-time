@@ -2,6 +2,7 @@ import { Location, State } from 'history';
 import { Navigate, RouteObject } from 'react-router';
 
 import Dashboard from '../../pages/dashboard/Dashboard';
+import GroupGift from '../../pages/groupGift';
 import Groups from '../../pages/groups';
 import InvitedGroups from '../../pages/groups/invited/InvitedGroups';
 import JoinedGroups from '../../pages/groups/joined/JoinedGroups';
@@ -86,6 +87,10 @@ export const getRoutes = (
                     element: showNestedPrivateElement(<ViewGroup />),
                 },
             ],
+        },
+        {
+            path: '/group-gift/:group_id',
+            element: showPrivateElement(<GroupGift />),
         },
         {
             path: '/home',

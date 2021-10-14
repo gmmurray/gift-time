@@ -1,14 +1,16 @@
-import { DataGrid, GridColDef, GridSelectionModel } from '@mui/x-data-grid';
-import { useCallback, useState } from 'react';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { Fragment, useCallback, useState } from 'react';
+import { NavigateFunction, useNavigate } from 'react-router';
 
 import { Auth } from '@supabase/ui';
 import BasicPaperContainer from '../../../components/shared/BasicPaperContainer';
-import { Button } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import HomeIcon from '@mui/icons-material/Home';
 import PageTitle from '../../../components/shared/PageTitle';
+import TooltipButton from '../../../components/shared/TooltipButton';
 import { useGetOwnedGroups } from '../../../domain/services/groupService';
-import { useNavigate } from 'react-router';
 
-const tableCols: GridColDef[] = [
+const getTableCols = (navigate: NavigateFunction): GridColDef[] => [
     {
         field: 'name',
         headerName: 'name',
@@ -33,19 +35,44 @@ const tableCols: GridColDef[] = [
         align: 'right',
         headerAlign: 'right',
     },
+    {
+        field: 'actions',
+        headerName: 'actions',
+        sortable: false,
+        align: 'right',
+        headerAlign: 'right',
+        renderCell: params => {
+            const { id } = params.row;
+            const onViewClick = () => navigate(`/groups/view/${id}`);
+            const onPageClick = () => navigate(`/group-gift/${id}`);
+            return (
+                <Fragment>
+                    <TooltipButton
+                        text="edit group"
+                        icon={EditIcon}
+                        onClick={onViewClick}
+                    />
+                    <TooltipButton
+                        text="go to page"
+                        icon={HomeIcon}
+                        onClick={onPageClick}
+                    />
+                </Fragment>
+            );
+        },
+    },
 ];
 
 const OwnedGroups = () => {
     const { user } = Auth.useUser();
     const { data, isLoading } = useGetOwnedGroups(user?.id);
-    const [selected, setSelected] = useState<GridSelectionModel | null>(null);
     const [pageSize, setPageSize] = useState(5);
     const navigate = useNavigate();
-    const handleViewClick = useCallback(() => {
-        if (selected && selected[0] !== undefined) {
-            navigate(`/groups/view/${selected[0]}`);
-        }
-    }, [navigate, selected]);
+
+    const getColumnDefinitions = useCallback(
+        () => getTableCols(navigate),
+        [navigate],
+    );
 
     const tableRows = (data ?? []).map(g => ({
         id: g.group_id,
@@ -58,24 +85,16 @@ const OwnedGroups = () => {
     return (
         <BasicPaperContainer>
             <PageTitle>my groups</PageTitle>
-            <Button
-                variant="contained"
-                onClick={handleViewClick}
-                disabled={!selected || (selected && !selected[0])}
-                sx={{ mb: 2 }}
-            >
-                view group
-            </Button>
             <DataGrid
                 autoHeight
                 rows={tableRows}
-                columns={tableCols}
+                columns={getColumnDefinitions()}
                 loading={isLoading}
                 pagination
                 pageSize={pageSize}
                 rowsPerPageOptions={[5, 10, 20]}
                 onPageSizeChange={newPageSize => setPageSize(newPageSize)}
-                onSelectionModelChange={data => setSelected(data)}
+                disableSelectionOnClick
             />
         </BasicPaperContainer>
     );

@@ -10,6 +10,7 @@ import { useMutation, useQuery } from 'react-query';
 
 import { GroupInvite } from '../entities/GroupInvite';
 import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime';
+import { getJoinedGroupsKey } from './groupService';
 import { queryClient } from '../../utils/config/queryClient';
 import { supabaseClient } from '../../utils/config/supabase';
 
@@ -42,10 +43,14 @@ export const useGetGroupMembersByGroup = (group_id?: number) =>
 //#endregion
 
 //#region create
-export const createGroupMember = async (group_id: number, user_id: string) => {
+export const createGroupMember = async (
+    group_id: number,
+    user_id: string,
+    is_owner: boolean,
+) => {
     const { data, error } = await supabaseClient
         .from<GroupMember>(GroupMembersTable)
-        .insert({ group_id, user_id });
+        .insert({ group_id, user_id, is_owner });
 
     if (error) throw error.message;
 
@@ -107,13 +112,13 @@ const acceptGroupInvite = async (invite: GroupInvite) => {
     return acceptRes;
 };
 
-// TODO: invalidate joined group query
 export const useAcceptGroupInvite = () =>
     useMutation((invite: GroupInvite) => acceptGroupInvite(invite), {
         onSuccess: () => {
             queryClient.invalidateQueries(
                 groupInviteService.getGroupInvitesByUserKey,
             );
+            queryClient.invalidateQueries(getJoinedGroupsKey);
         },
     });
 //#endregion

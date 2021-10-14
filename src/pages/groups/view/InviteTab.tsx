@@ -122,6 +122,7 @@ const InviteTab = () => {
                             container
                             component={Paper}
                             sx={{ bgcolor: defaultBgColor, mb: 1, pb: 1 }}
+                            key={invite.group_invite_id}
                         >
                             <Grid item sx={{ ml: 1 }}>
                                 <Avatar
