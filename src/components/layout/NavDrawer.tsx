@@ -11,6 +11,7 @@ import {
 import { FC, Fragment, ReactElement, useCallback, useState } from 'react';
 
 import Add from '@mui/icons-material/Add';
+import CardGiftcard from '@mui/icons-material/CardGiftcard';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import GroupAdd from '@mui/icons-material/GroupAdd';
@@ -18,6 +19,8 @@ import GroupsIcon from '@mui/icons-material/Group';
 import HomeIcon from '@mui/icons-material/Home';
 import People from '@mui/icons-material/People';
 import PeopleOutline from '@mui/icons-material/PeopleOutline';
+import Public from '@mui/icons-material/Public';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useNavigate } from 'react-router';
 
 const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -67,6 +70,27 @@ const folders: DrawerFolder[] = [
                 name: 'invitations',
                 route: '/groups/invited',
                 icon: <GroupAdd />,
+            },
+        ],
+    },
+    {
+        name: 'my gifts',
+        icon: <CardGiftcard />,
+        links: [
+            {
+                name: 'new gift',
+                route: '/gifts/new',
+                icon: <Add />,
+            },
+            {
+                name: 'public gifts',
+                route: '/gifts/public',
+                icon: <Public />,
+            },
+            {
+                name: 'private gifts',
+                route: '/gifts/private',
+                icon: <VisibilityOff />,
             },
         ],
     },

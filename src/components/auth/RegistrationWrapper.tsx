@@ -30,6 +30,7 @@ const RegistrationWrapper: FC = ({ children }) => {
         register,
         handleSubmit,
         formState: { errors: formErrors },
+        watch,
     } = useForm({
         resolver: yupResolver(userProfileSchema),
         defaultValues:
@@ -68,6 +69,7 @@ const RegistrationWrapper: FC = ({ children }) => {
             </Backdrop>
         );
     } else if (!profile) {
+        const watchAvatarUrl = watch('avatar_url');
         return (
             <ResponsiveDialog
                 open={true}
@@ -80,6 +82,7 @@ const RegistrationWrapper: FC = ({ children }) => {
                     onFieldRegister={register}
                     formErrors={formErrors}
                     loading={createMutation.isLoading}
+                    watchAvatarUrl={watchAvatarUrl}
                 />
             </ResponsiveDialog>
         );

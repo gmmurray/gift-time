@@ -33,6 +33,7 @@ const UpdateUserProfileModal: FC<UpdateUserProfileModalProps> = ({
         handleSubmit,
         formState: { errors: formErrors },
         reset,
+        watch,
     } = useForm({
         resolver: yupResolver(userProfileSchema),
         defaultValues: user && user.profile ? { ...user.profile } : undefined,
@@ -62,6 +63,8 @@ const UpdateUserProfileModal: FC<UpdateUserProfileModalProps> = ({
         [enqueueSnackbar, updateMutation],
     );
 
+    const watchAvatarUrl = watch('avatar_url');
+
     return (
         <ResponsiveDialog
             open={open}
@@ -74,6 +77,7 @@ const UpdateUserProfileModal: FC<UpdateUserProfileModalProps> = ({
                 formErrors={formErrors}
                 loading={updateMutation.isLoading}
                 isAddMode={true}
+                watchAvatarUrl={watchAvatarUrl}
             />
         </ResponsiveDialog>
     );

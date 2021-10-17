@@ -2,6 +2,7 @@ import { Location, State } from 'history';
 import { Navigate, RouteObject } from 'react-router';
 
 import Dashboard from '../../pages/dashboard/Dashboard';
+import Gifts from '../../pages/gifts';
 import GroupGift from '../../pages/groupGift';
 import Groups from '../../pages/groups';
 import InvitedGroups from '../../pages/groups/invited/InvitedGroups';
@@ -9,10 +10,14 @@ import JoinedGroups from '../../pages/groups/joined/JoinedGroups';
 import LandingPage from '../../pages/landingPage/LandingPage';
 import Layout from '../../components/layout/Layout';
 import Login from '../../pages/login/Login';
+import NewGift from '../../pages/gifts/new/NewGift';
 import NewGroup from '../../pages/groups/new/NewGroup';
 import NotFound from '../../pages/notFound/NotFound';
 import OwnedGroups from '../../pages/groups/owned/OwnedGroups';
+import PrivateGifts from '../../pages/gifts/private/PrivateGifts';
+import PublicGifts from '../../pages/gifts/public/PublicGifts';
 import { ReactElement } from 'react';
+import ViewGift from '../../pages/gifts/view/ViewGift';
 import ViewGroup from '../../pages/groups/view/ViewGroup';
 
 const elementWithLayout = (element: ReactElement) => <Layout>{element}</Layout>;
@@ -85,6 +90,28 @@ export const getRoutes = (
                 {
                     path: 'view/:group_id',
                     element: showNestedPrivateElement(<ViewGroup />),
+                },
+            ],
+        },
+        {
+            path: '/gifts',
+            element: showPrivateElement(<Gifts />),
+            children: [
+                {
+                    path: 'new',
+                    element: showNestedPrivateElement(<NewGift />),
+                },
+                {
+                    path: 'public',
+                    element: showNestedPrivateElement(<PublicGifts />),
+                },
+                {
+                    path: 'private',
+                    element: showNestedPrivateElement(<PrivateGifts />),
+                },
+                {
+                    path: 'view/:gift_id',
+                    element: showNestedPrivateElement(<ViewGift />),
                 },
             ],
         },

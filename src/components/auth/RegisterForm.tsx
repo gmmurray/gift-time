@@ -1,5 +1,5 @@
+import { Avatar, Grid, TextField, Typography } from '@mui/material';
 import { FieldError, UseFormRegister } from 'react-hook-form';
-import { Grid, TextField } from '@mui/material';
 
 import { FC } from 'react';
 import LoadableButton from '../shared/LoadableButton';
@@ -13,6 +13,7 @@ type RegisterFormProps = {
     };
     loading: boolean;
     isAddMode?: boolean;
+    watchAvatarUrl: string | null;
 };
 
 const RegisterForm: FC<RegisterFormProps> = ({
@@ -20,6 +21,7 @@ const RegisterForm: FC<RegisterFormProps> = ({
     onFieldRegister,
     formErrors,
     loading,
+    watchAvatarUrl,
     isAddMode = false,
 }) => (
     <form onSubmit={onFormSubmit}>
@@ -42,6 +44,10 @@ const RegisterForm: FC<RegisterFormProps> = ({
                     helperText={formErrors.avatar_url?.message}
                     fullWidth
                 />
+            </Grid>
+            <Grid item xs={12}>
+                <Typography variant="subtitle2">preview</Typography>
+                <Avatar src={watchAvatarUrl ?? undefined} />
             </Grid>
             <Grid item xs={12}>
                 <LoadableButton

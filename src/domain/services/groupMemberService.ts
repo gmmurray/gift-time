@@ -40,6 +40,20 @@ export const useGetGroupMembersByGroup = (group_id?: number) =>
             enabled: !!group_id,
         },
     );
+
+export const getGroupMember = async (user_id?: string, group_id?: number) => {
+    if (!user_id || !group_id) return null;
+
+    const { data, error } = await supabaseClient
+        .from<GroupMember>(GroupMembersTable)
+        .select()
+        .match({ user_id, group_id })
+        .single();
+
+    if (error) throw error.message;
+
+    return data;
+};
 //#endregion
 
 //#region create
