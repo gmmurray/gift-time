@@ -126,15 +126,12 @@ const InviteTab = () => {
                         >
                             <Grid item sx={{ ml: 1 }}>
                                 <Avatar
-                                    src={
-                                        invite.user_profiles?.avatar_url ??
-                                        undefined
-                                    }
+                                    src={invite.user?.avatar_url ?? undefined}
                                 />
                             </Grid>
                             <Grid item sx={{ ml: 1 }}>
                                 <Typography variant="body1">
-                                    {invite.user_profiles.email}
+                                    {invite.user.email}
                                 </Typography>
                                 <Typography
                                     variant="subtitle1"

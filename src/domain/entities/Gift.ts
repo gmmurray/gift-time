@@ -1,5 +1,5 @@
+import { ClaimedGiftWithUser } from './ClaimedGift';
 import { DbEntity } from './DbEntity';
-import { UserProfile } from './UserProfile';
 
 export const GiftsTable = 'gifts';
 
@@ -14,8 +14,6 @@ export interface Gift extends DbEntity {
     priority: number;
 }
 
-export interface GroupGift extends DbEntity {
-    status_id: number;
-    claimed_by: string;
-    user_profiles: UserProfile;
+export interface GiftWithClaim extends Gift {
+    claimed_by?: ClaimedGiftWithUser;
 }

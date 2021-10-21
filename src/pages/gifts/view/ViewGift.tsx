@@ -21,7 +21,6 @@ import GiftForm from '../../../components/gifts/GiftForm';
 import { Link } from 'react-router-dom';
 import PageTitle from '../../../components/shared/PageTitle';
 import { addGiftSchema } from '../../../utils/config/formSchema/gift';
-import { defaultBgColor } from '../../../lib/constants/styles';
 import { noop } from '../../../utils/helpers/noop';
 import { useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';

@@ -76,8 +76,8 @@ const InvitedGroups = () => {
         if (isLoading) {
             return (
                 <Stack spacing={2}>
-                    {[...Array(3)].map(() => (
-                        <Skeleton variant="text" />
+                    {[...Array(3)].map((e, i) => (
+                        <Skeleton variant="text" key={i} />
                     ))}
                 </Stack>
             );
@@ -91,8 +91,7 @@ const InvitedGroups = () => {
             return (
                 <Grid container rowSpacing={2} sx={{ mt: 1 }}>
                     {data.map(invite => {
-                        const avatar_url =
-                            invite.groups.user_profiles.avatar_url;
+                        const avatar_url = invite.groups.user.avatar_url;
                         const avatarSrc =
                             !avatar_url || avatar_url === ''
                                 ? undefined
@@ -116,10 +115,7 @@ const InvitedGroups = () => {
                                         variant="subtitle1"
                                         color="text.secondary"
                                     >
-                                        {
-                                            invite.groups.user_profiles
-                                                .display_name
-                                        }
+                                        {invite.groups.user.display_name}
                                     </Typography>
                                 </Grid>
                                 <Grid item sx={{ ml: 1 }}>

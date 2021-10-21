@@ -50,6 +50,7 @@ const GroupTab = () => {
         formState: { errors: formErrors },
         control,
         setValue,
+        watch,
     } = useForm({
         resolver: yupResolver(addGroupSechma),
     });
@@ -107,6 +108,7 @@ const GroupTab = () => {
         );
     }
 
+    const watchImageUrl = watch('image_url');
     return (
         <Paper elevation={3} sx={{ p: 2, bgcolor: defaultBgColor }}>
             <Typography variant="h4" sx={{ mb: 2 }}>
@@ -123,6 +125,7 @@ const GroupTab = () => {
                 group={isLoading ? undefined : data!}
                 onDelete={handleOpenDeleteConfirmationDialog}
                 deleteLoading={deleteGroupMutation.isLoading}
+                watchImageUrl={watchImageUrl}
             />
             <ConfirmationDialog
                 onConfirm={handleDeleteGroup}

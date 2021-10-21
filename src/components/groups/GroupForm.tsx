@@ -6,7 +6,7 @@ import {
     UseFormRegister,
 } from 'react-hook-form';
 import { DatePicker, LocalizationProvider } from '@mui/lab';
-import { Grid, TextField } from '@mui/material';
+import { Grid, TextField, Typography } from '@mui/material';
 
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import { FC } from 'react';
@@ -27,6 +27,7 @@ type GroupFormProps = {
     isAddMode: boolean;
     onDelete?: () => any;
     group?: Group;
+    watchImageUrl: string | null;
 };
 
 const GroupForm: FC<GroupFormProps> = ({
@@ -40,6 +41,7 @@ const GroupForm: FC<GroupFormProps> = ({
     isAddMode,
     onDelete,
     group,
+    watchImageUrl,
 }) => (
     <form onSubmit={onFormSubmit}>
         <Grid container spacing={2}>
@@ -87,6 +89,26 @@ const GroupForm: FC<GroupFormProps> = ({
                     )}
                 />
             </Grid>
+            <Grid item xs={12}>
+                <TextField
+                    {...onRegister('image_url')}
+                    label="image url"
+                    error={!!formErrors.image_url}
+                    helperText={formErrors.image_url?.message}
+                    fullWidth
+                />
+            </Grid>
+            {watchImageUrl && (
+                <Grid item xs={12}>
+                    <Typography variant="subtitle2">preview</Typography>
+                    <img
+                        src={watchImageUrl}
+                        width="100"
+                        height="56"
+                        alt="preview"
+                    />
+                </Grid>
+            )}
             <Grid item xs={12}>
                 <LoadableButton
                     type="submit"

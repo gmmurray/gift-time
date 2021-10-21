@@ -1,6 +1,7 @@
+import * as giftService from './giftService';
 import * as groupMemberService from './groupMemberService';
 
-import { Group, GroupsTable } from '../entities/Group';
+import { Group, GroupGiftResult, GroupsTable } from '../entities/Group';
 import { GroupInvite, GroupInvitesTable } from '../entities/GroupInvite';
 import {
     GroupMember,
@@ -9,6 +10,7 @@ import {
 } from '../entities/GroupMember';
 import { useMutation, useQuery } from 'react-query';
 
+import { GiftWithClaim } from '../entities/Gift';
 import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime';
 import { getGroupInvitesByUserKey } from './groupInviteService';
 import { queryClient } from '../../utils/config/queryClient';
@@ -57,7 +59,7 @@ const getOwnedGroups = async (owner_id?: string) => {
             `
       group_id,
       created_at,
-      user:user_profiles (
+      user:user_id (
         display_name,
         avatar_url
       )`,
@@ -70,7 +72,7 @@ const getOwnedGroups = async (owner_id?: string) => {
             `
     group_id,
     created_at,
-    user:user_profiles (
+    user:user_id (
       display_name,
       avatar_url
     )`,
@@ -108,13 +110,26 @@ export const useGetOwnedGroups = (owner_id?: string) =>
         enabled: !!owner_id,
     });
 
+const getJoinedGroup = async (group_id?: number, user_id?: string) => {
+    if (!group_id || !user_id) return null;
+    const { data, error } = await supabaseClient
+        .from<GroupMemberWithGroup>(GroupMembersTable)
+        .select('*, groups (*, user:owner_id (*))')
+        .match({ user_id, group_id })
+        .single();
+
+    if (error) throw error.message;
+
+    return data;
+};
+
 export const getJoinedGroupsKey = 'get-joined-groups';
 const getJoinedGroups = async (user_id?: string) => {
     if (!user_id) return [];
 
     const { data: memberData, error: memberError } = await supabaseClient
         .from<GroupMemberWithGroup>(GroupMembersTable)
-        .select('*, groups (*, user_profiles:owner_id (*))')
+        .select('*, groups (*, user:owner_id (*))')
         .match({ user_id, is_owner: false });
 
     if (memberError) throw memberError.message;
@@ -128,6 +143,56 @@ export const useGetJoinedGroups = (user_id?: string) =>
     useQuery(getJoinedGroupsKey, () => getJoinedGroups(user_id), {
         staleTime: defaultQueryCacheTime,
         enabled: !!user_id,
+    });
+
+export const getGroupGiftKey = (group_id?: number) =>
+    'load-group-gift' + (group_id ? `-${group_id}` : '');
+const getGroupGift = async (group_id?: number, user_id?: string) => {
+    if (!group_id || !user_id) return null;
+
+    // first get the group
+    const groupMemberWithGroup = await getJoinedGroup(group_id, user_id);
+
+    if (!groupMemberWithGroup) return null;
+
+    // then get the group members (not including the user)
+    const groupMembers = await groupMemberService.getGroupGiftMembers(
+        group_id,
+        user_id,
+    );
+
+    // get their gifts
+    const gifts = await giftService.getGroupGifts(
+        groupMembers.map(gm => gm.user_id),
+        user_id,
+    );
+
+    const members = groupMembers.map(gm => ({
+        ...gm,
+        gifts: [] as GiftWithClaim[],
+    }));
+
+    // assign gifts to respective members
+    gifts.forEach(g => {
+        const member = members.find(m => m.user_id === g.user_id);
+        if (member) {
+            member.gifts = [...member.gifts, g];
+        }
+    });
+
+    const result: GroupGiftResult = {
+        ...groupMemberWithGroup.groups,
+        members,
+    };
+
+    return result;
+};
+
+export const useGetGroupGift = (group_id?: number, user_id?: string) =>
+    useQuery(getGroupGiftKey(group_id), () => getGroupGift(group_id, user_id), {
+        staleTime: defaultQueryCacheTime,
+        enabled: !!group_id && !!user_id,
+        retry: 0,
     });
 //#endregion
 

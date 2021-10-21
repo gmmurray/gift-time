@@ -21,7 +21,7 @@ const getGroupInvitesByGroup = async (group_id?: number) => {
     if (!group_id) return;
     const { data, error } = await supabaseClient
         .from<GroupInviteWithProfile>(GroupInvitesTable)
-        .select(`*, user_profiles (*)`)
+        .select(`*, user:user_id (*)`)
         .match({ group_id });
 
     if (error) throw error.message;
@@ -44,7 +44,7 @@ const getGroupInvitesByUser = async (user_id?: string) => {
     if (!user_id) return;
     const { data, error } = await supabaseClient
         .from<GroupInviteWithGroup>(GroupInvitesTable)
-        .select('*, groups (*, user_profiles:owner_id (*))')
+        .select('*, groups (*, user:owner_id (*))')
         .match({ user_id });
 
     if (error) throw error.message;

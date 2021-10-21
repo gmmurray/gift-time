@@ -1,3 +1,5 @@
+import { Button, Tab } from '@mui/material';
+import { Link, useParams } from 'react-router-dom';
 import { SyntheticEvent, useCallback, useState } from 'react';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 
@@ -7,12 +9,12 @@ import InviteTab from './InviteTab';
 import MemberTab from './MemberTab';
 import PageTitle from '../../../components/shared/PageTitle';
 import { SxProps } from '@mui/system';
-import { Tab } from '@mui/material';
 
 const tabPanelStyles: SxProps = { px: 0, pb: 0 };
 
 const ViewGroup = () => {
     const [currentTab, setCurrentTab] = useState('0');
+    const { group_id } = useParams();
 
     const handleTabChange = useCallback(
         (event: SyntheticEvent, newTabValue: string) =>
@@ -23,6 +25,9 @@ const ViewGroup = () => {
     return (
         <BasicPaperContainer>
             <PageTitle>group details</PageTitle>
+            <Button component={Link} to={`/group-gift/${group_id}`}>
+                go to page
+            </Button>
             <TabContext value={currentTab}>
                 <TabList
                     onChange={handleTabChange}

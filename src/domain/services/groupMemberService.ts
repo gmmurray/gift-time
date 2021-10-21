@@ -15,6 +15,23 @@ import { queryClient } from '../../utils/config/queryClient';
 import { supabaseClient } from '../../utils/config/supabase';
 
 //#region get
+export const getGroupGiftMembers = async (
+    group_id?: number,
+    user_id?: string,
+) => {
+    if (!group_id || !user_id) return [];
+
+    const { data, error } = await supabaseClient
+        .from<GroupMemberWithProfile>(GroupMembersTable)
+        .select('*, user:user_id (*)')
+        .match({ group_id })
+        .not('user_id', 'eq', user_id);
+
+    if (error) throw error.message;
+
+    return data ?? [];
+};
+
 export const getGroupMembersByGroupKey = (group_id?: number) =>
     group_id
         ? `get-group-members-by-group-${group_id}`
@@ -23,7 +40,7 @@ const getGroupMembersByGroup = async (group_id?: number) => {
     if (!group_id) return;
     const { data, error } = await supabaseClient
         .from<GroupMemberWithProfile>(GroupMembersTable)
-        .select('*, user_profiles (*)')
+        .select('*, user:user_id (*)')
         .match({ group_id });
 
     if (error) throw error.message;

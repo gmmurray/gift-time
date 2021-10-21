@@ -91,6 +91,10 @@ export const getRoutes = (
                     path: 'view/:group_id',
                     element: showNestedPrivateElement(<ViewGroup />),
                 },
+                {
+                    path: '',
+                    element: <Navigate to="/groups/joined" />,
+                },
             ],
         },
         {
@@ -112,6 +116,10 @@ export const getRoutes = (
                 {
                     path: 'view/:gift_id',
                     element: showNestedPrivateElement(<ViewGift />),
+                },
+                {
+                    path: '*',
+                    element: showNestedPrivateElement(<PublicGifts />),
                 },
             ],
         },

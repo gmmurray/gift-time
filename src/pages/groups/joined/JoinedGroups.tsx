@@ -72,8 +72,8 @@ const JoinedGroups = () => {
         id: g.group_id,
         name: g.name,
         due_date: g.due_date,
-        display_name: g.user_profiles.display_name,
-        avatar_url: g.user_profiles.avatar_url,
+        display_name: g.user.display_name,
+        avatar_url: g.user.avatar_url,
     }));
 
     return (

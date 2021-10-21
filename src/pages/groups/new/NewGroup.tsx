@@ -32,6 +32,7 @@ const NewGroup = () => {
         handleSubmit,
         formState: { errors: formErrors },
         control,
+        watch,
     } = useForm({
         resolver: yupResolver(addGroupSechma),
     });
@@ -62,6 +63,8 @@ const NewGroup = () => {
         },
         [createMutation, enqueueSnackbar, navigate, user],
     );
+
+    const watchImageUrl = watch('image_url');
     return (
         <BasicPaperContainer>
             <PageTitle>create a group</PageTitle>
@@ -73,6 +76,7 @@ const NewGroup = () => {
                 useAutoFocus
                 saveLoading={createMutation.isLoading}
                 isAddMode
+                watchImageUrl={watchImageUrl}
             />
         </BasicPaperContainer>
     );

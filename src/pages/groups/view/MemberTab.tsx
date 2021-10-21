@@ -53,8 +53,8 @@ const MemberTab = () => {
         if (isLoading) {
             return (
                 <Stack spacing={2}>
-                    {[...Array(3)].map(() => (
-                        <Skeleton variant="text" />
+                    {[...Array(3)].map((e, i) => (
+                        <Skeleton variant="text" key={i} />
                     ))}
                 </Stack>
             );
@@ -68,7 +68,7 @@ const MemberTab = () => {
             return (
                 <Grid container rowSpacing={2} sx={{ mt: 1 }}>
                     {data.map(member => {
-                        const avatar_url = member.user_profiles.avatar_url;
+                        const avatar_url = member.user.avatar_url;
                         const avatarSrc =
                             !avatar_url || avatar_url === ''
                                 ? undefined
@@ -88,13 +88,13 @@ const MemberTab = () => {
                                 </Grid>
                                 <Grid item sx={{ ml: 1 }}>
                                     <Typography variant="body1">
-                                        {member.user_profiles.display_name}
+                                        {member.user.display_name}
                                     </Typography>
                                     <Typography
                                         variant="subtitle1"
                                         color="text.secondary"
                                     >
-                                        {member.user_profiles.email}
+                                        {member.user.email}
                                     </Typography>
                                     <Typography
                                         variant="subtitle1"

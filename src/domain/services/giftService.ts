@@ -1,6 +1,4 @@
-import * as groupMemberService from './groupMemberService';
-
-import { Gift, GiftsTable, GroupGift } from '../entities/Gift';
+import { Gift, GiftWithClaim, GiftsTable } from '../entities/Gift';
 import { useMutation, useQuery } from 'react-query';
 
 import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime';
@@ -69,35 +67,19 @@ export const useGetOwnGifts = (user_id?: string, is_private?: boolean) =>
         },
     );
 
-const getGroupGiftsKey = 'get-group-gifts';
-const getGroupGifts = async (user_id?: string, group_id?: number) => {
-    if (!user_id || !group_id) return [];
-
-    const groupMember = await groupMemberService.getGroupMember(
-        user_id,
-        group_id,
-    );
-
-    if (!groupMember) throw Error('you do not have access');
-
+export const getGroupGifts = async (member_ids: string[], user_id?: string) => {
     const { data, error } = await supabaseClient
-        .from<GroupGift>(GiftsTable)
-        .select(
-            'gift_id, created_at, name, description, price, web_link, priority, is_private, priority, claimed_by, user_profiles (*)',
-        )
-        .match({ group_id, user_id: !user_id });
+        .from<GiftWithClaim>(GiftsTable)
+        .select('*, claimed_by:claimed_gift_id(*)')
+        .match({ is_private: false })
+        .not('user_id', 'eq', user_id)
+        .in('user_id', member_ids);
 
     if (error) throw error.message;
 
     return data ?? [];
 };
 
-export const useGetGroupGifts = (user_id?: string, group_id?: number) =>
-    useQuery(getGroupGiftsKey, () => getGroupGifts(user_id, group_id), {
-        enabled: !!user_id && !!group_id,
-        retry: 2,
-        staleTime: defaultQueryCacheTime,
-    });
 //#endregion
 
 //#region create
@@ -139,40 +121,6 @@ export const useUpdateGift = () =>
             queryClient.invalidateQueries(getOwnGiftsKey(gift?.is_private)),
     });
 
-const patchGroupGift = async (
-    key: keyof GroupGift,
-    value: GroupGift,
-    gift_id?: number,
-) => {
-    if (!gift_id) return null;
-
-    const { data, error } = await supabaseClient
-        .from<GroupGift>(GiftsTable)
-        .update({ [key]: value[key] })
-        .match({ gift_id })
-        .single();
-
-    if (error) throw error.message;
-
-    return data;
-};
-
-type patchGroupGiftParams = {
-    key: keyof GroupGift;
-    value: GroupGift;
-    gift_id?: number;
-};
-export const usePatchGroupGift = () =>
-    useMutation(
-        ({ key, value, gift_id }: patchGroupGiftParams) =>
-            patchGroupGift(key, value, gift_id),
-        {
-            onSuccess: () => {
-                queryClient.invalidateQueries(getGroupGiftsKey);
-                queryClient.invalidateQueries(getOwnGiftsKey());
-            },
-        },
-    );
 //#endregion
 
 //#region delete
@@ -196,7 +144,6 @@ export const useDeleteGift = () =>
             deleteGift(gift_id, user_id),
         {
             onSuccess: () => {
-                queryClient.invalidateQueries(getGroupGiftsKey);
                 queryClient.invalidateQueries(getOwnGiftsKey());
             },
         },

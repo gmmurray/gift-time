@@ -1,6 +1,7 @@
+import { GroupGiftMember, GroupMember } from './GroupMember';
+
 import { DbEntity } from './DbEntity';
 import { GroupInvite } from './GroupInvite';
-import { GroupMember } from './GroupMember';
 import { UserProfile } from './UserProfile';
 
 export const GroupsTable = 'groups';
@@ -10,6 +11,7 @@ export interface Group extends DbEntity {
     name: string;
     owner_id: string;
     due_date: Date;
+    image_url: string | null;
 }
 
 export interface OwnedGroup extends Group {
@@ -18,5 +20,9 @@ export interface OwnedGroup extends Group {
 }
 
 export interface GroupWithUser extends Group {
-    user_profiles: UserProfile;
+    user: UserProfile;
+}
+
+export interface GroupGiftResult extends GroupWithUser {
+    members: GroupGiftMember[];
 }

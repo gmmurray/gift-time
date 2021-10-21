@@ -1,4 +1,5 @@
 import { DbEntity } from './DbEntity';
+import { GiftWithClaim } from './Gift';
 import { GroupWithUser } from './Group';
 import { UserProfile } from './UserProfile';
 
@@ -12,7 +13,12 @@ export interface GroupMember extends DbEntity {
 }
 
 export interface GroupMemberWithProfile extends GroupMember {
-    user_profiles: UserProfile;
+    user: UserProfile;
+}
+
+export interface GroupGiftMember extends GroupMember {
+    user: UserProfile;
+    gifts: GiftWithClaim[];
 }
 
 export interface GroupMemberWithGroup extends GroupMember {

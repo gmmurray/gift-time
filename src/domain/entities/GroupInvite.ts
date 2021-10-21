@@ -11,7 +11,7 @@ export interface GroupInvite extends DbEntity {
 }
 
 export interface GroupInviteWithProfile extends GroupInvite {
-    user_profiles: UserProfile;
+    user: UserProfile;
 }
 
 export interface GroupInviteWithGroup extends GroupInvite {
