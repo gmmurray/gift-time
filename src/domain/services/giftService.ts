@@ -70,7 +70,9 @@ export const useGetOwnGifts = (user_id?: string, is_private?: boolean) =>
 export const getGroupGifts = async (member_ids: string[], user_id?: string) => {
     const { data, error } = await supabaseClient
         .from<GiftWithClaim>(GiftsTable)
-        .select('*, claimed_by:claimed_gift_id(*)')
+        .select(
+            '*, claimed_by:claimed_gift_id(*, claimed_by_user:claimed_by (*))',
+        )
         .match({ is_private: false })
         .not('user_id', 'eq', user_id)
         .in('user_id', member_ids);

@@ -15,11 +15,19 @@ import {
     Tooltip,
 } from '@mui/material';
 import { FC, useCallback, useEffect, useState } from 'react';
+import {
+    FilterMenuItem,
+    FilterMenuState,
+    MemberFilter,
+    OrderBy,
+    OrderDir,
+    Refine,
+    applyFilter,
+    defaultMemberFilter,
+} from '../../utils/groupGift/memberFilter';
 import { Sort, Tune } from '@mui/icons-material';
 
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
-import { GiftWithClaim } from '../../domain/entities/Gift';
-import { GroupGiftMember } from '../../domain/entities/GroupMember';
 import GroupMemberList from './GroupMemberList';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -34,79 +42,6 @@ type MainContentProps = {
     ownerProfile: UserProfile;
     groupImage: string | null;
     groupName: string;
-};
-
-type OrderBy = 'claimed-gifts' | 'requested-gifts' | 'name' | null;
-type OrderDir = 'asc' | 'desc';
-type Refine = 'available' | 'claimed' | null;
-
-type MemberFilter = {
-    search: string;
-    orderBy: OrderBy;
-    orderDir: OrderDir;
-    refine: Refine;
-};
-
-const defaultMemberFilter: MemberFilter = {
-    search: '',
-    orderBy: null,
-    orderDir: 'asc',
-    refine: null,
-};
-
-type FilterMenuState = {
-    refine: {
-        anchorEl: HTMLElement | null;
-    };
-    sort: {
-        anchorEl: HTMLElement | null;
-    };
-};
-
-type FilterMenuItem = {
-    text: string;
-    icon?: React.ReactElement;
-    selected: boolean;
-    onClick: () => any;
-};
-
-const getSearchClause = (search: string, display_name: string) =>
-    display_name.toLocaleLowerCase().includes(search.toLocaleLowerCase());
-const getRefineClause = (refine: Refine, gifts: GiftWithClaim[]) => {
-    if (!refine) return true;
-    else if (refine === 'available') {
-        return gifts.some(g => !g.claimed_by);
-    } else {
-        return gifts.every(g => !!g.claimed_by);
-    }
-};
-
-const applyFilter = (filter: MemberFilter, members: GroupGiftMember[]) => {
-    const { search, orderBy, orderDir, refine } = filter;
-    let result = [...members];
-    result = result
-        .filter(
-            m =>
-                getSearchClause(search, m.user.display_name) &&
-                getRefineClause(refine, m.gifts),
-        )
-        .sort((a, b) => {
-            if (!orderBy) return 0;
-            const result = orderDir === 'asc' ? 1 : -1;
-            if (orderBy === 'claimed-gifts') {
-                return a.gifts.filter(g => !!g.claimed_by).length >
-                    b.gifts.filter(g => !!g.claimed_by).length
-                    ? result
-                    : -result;
-            } else if (orderBy === 'requested-gifts') {
-                return a.gifts.length > b.gifts.length ? result : -result;
-            } else {
-                return a.user.display_name > b.user.display_name
-                    ? result
-                    : -result;
-            }
-        });
-    return result;
 };
 
 const MainContent: FC<MainContentProps> = ({
@@ -243,7 +178,7 @@ const MainContent: FC<MainContentProps> = ({
         <Card>
             <CardHeader
                 avatar={
-                    <Tooltip title={`${ownerProfile.display_name}'s group'`}>
+                    <Tooltip title={`${ownerProfile.display_name}'s group`}>
                         <Avatar src={ownerProfile.avatar_url ?? undefined} />
                     </Tooltip>
                 }
@@ -256,7 +191,15 @@ const MainContent: FC<MainContentProps> = ({
                     variant: 'subtitle1',
                 }}
             />
-            <CardMedia component="img" src={headerImage} alt="group image" />
+            <CardMedia
+                component="img"
+                src={headerImage}
+                alt="group image"
+                sx={{
+                    maxHeight: '250px',
+                    mx: 'auto',
+                }}
+            />
             <CardContent>
                 <TextField
                     value={filter.search}

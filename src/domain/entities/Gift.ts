@@ -1,5 +1,6 @@
 import { ClaimedGiftWithUser } from './ClaimedGift';
 import { DbEntity } from './DbEntity';
+import { PriorityTypeEnum } from '../../lib/constants/priorityTypes';
 
 export const GiftsTable = 'gifts';
 
@@ -11,7 +12,7 @@ export interface Gift extends DbEntity {
     price: number;
     web_link: string;
     is_private: boolean;
-    priority: number;
+    priority: PriorityTypeEnum;
 }
 
 export interface GiftWithClaim extends Gift {

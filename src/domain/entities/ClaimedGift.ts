@@ -1,10 +1,11 @@
 import { DbEntity } from './DbEntity';
+import { StatusTypeEnum } from '../../lib/types/StatusTypeEnum';
 import { UserProfile } from './UserProfile';
 
 export interface ClaimedGift extends DbEntity {
     claimed_gift_id: number;
     gift_id: number;
-    status_id: number;
+    status_id: StatusTypeEnum;
     claimed_by: string;
 }
 

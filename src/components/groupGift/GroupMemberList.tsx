@@ -77,14 +77,16 @@ const GroupMemberList: FC<GroupMemberListProps> = ({ members }) => {
                                             <Typography variant="h6">
                                                 {m.user.display_name}
                                             </Typography>
-                                            {m.is_owner && (
-                                                <Typography
-                                                    variant="subtitle2"
-                                                    color="text.secondary"
-                                                >
-                                                    owner
-                                                </Typography>
-                                            )}
+                                            <Typography
+                                                variant="subtitle2"
+                                                color="text.secondary"
+                                            >
+                                                {m.is_owner ? (
+                                                    'owner'
+                                                ) : (
+                                                    <span>&nbsp;&nbsp;</span>
+                                                )}
+                                            </Typography>
                                         </Box>
                                         <Box>
                                             <Typography variant="body1">
@@ -93,7 +95,9 @@ const GroupMemberList: FC<GroupMemberListProps> = ({ members }) => {
                                             </Typography>
                                         </Box>
                                     </CardContent>
-                                    <CardActions sx={{ m: 0, p: 0 }}>
+                                    <CardActions
+                                        sx={{ m: 0, p: 0, ml: 'auto' }}
+                                    >
                                         <TooltipButton
                                             text="view gifts"
                                             icon={ArrowForwardIosIcon}
