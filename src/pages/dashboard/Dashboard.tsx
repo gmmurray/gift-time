@@ -1,9 +1,10 @@
 import { Fragment } from 'react';
 import { Grid } from '@mui/material';
-import PendingInvites from '../../components/dashboard/PendingInvites';
+import MyGroupStatus from '../../components/dashboard/MyGroupStatus';
 import PriorityGifts from '../../components/dashboard/PriorityGifts';
 import RecentMembers from '../../components/dashboard/RecentMembers';
 import RecentPurchase from '../../components/dashboard/RecentPurchase';
+import Spending from '../../components/dashboard/Spending';
 import UpcomingGroups from '../../components/dashboard/UpcomingGroups';
 
 const Dashboard = () => {
@@ -15,8 +16,11 @@ const Dashboard = () => {
             </Grid>
             <Grid container spacing={3} sx={{ pt: 3 }}>
                 <RecentPurchase size={4} />
-                <PendingInvites size={4} />
-                <RecentMembers size={4} />
+                <MyGroupStatus size={8} />
+            </Grid>
+            <Grid container spacing={3} sx={{ pt: 3 }}>
+                <RecentMembers size={6} />
+                <Spending size={6} />
             </Grid>
         </Fragment>
     );

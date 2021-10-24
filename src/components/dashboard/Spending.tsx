@@ -3,13 +3,13 @@ import { GridSize, Skeleton } from '@mui/material';
 import DashboardElement from './DashboardElement';
 import { FC } from 'react';
 
-type PendingInvitesProps = {
+type SpendingProps = {
     size: GridSize;
 };
 
-const PendingInvites: FC<PendingInvitesProps> = ({ size }) => {
+const Spending: FC<SpendingProps> = ({ size }) => {
     return (
-        <DashboardElement row={2} title="pending invites" size={size}>
+        <DashboardElement row={2} title="spending" size={size}>
             <Skeleton variant="text" sx={{ mb: 2 }} />
             <Skeleton variant="text" sx={{ mb: 2 }} />
             <Skeleton variant="text" sx={{ mb: 2 }} />
@@ -18,4 +18,4 @@ const PendingInvites: FC<PendingInvitesProps> = ({ size }) => {
     );
 };
 
-export default PendingInvites;
+export default Spending;
