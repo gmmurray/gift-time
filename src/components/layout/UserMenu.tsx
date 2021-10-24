@@ -1,5 +1,6 @@
 import {
     Avatar,
+    Badge,
     Divider,
     IconButton,
     ListItemIcon,
@@ -9,14 +10,18 @@ import {
 import { Fragment, useCallback, useState } from 'react';
 
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import { Logout } from '@mui/icons-material';
 import UpdateUserProfileModal from '../auth/UpdateUserProfileModal';
 import { supabaseClient } from '../../utils/config/supabase';
 import { useAppContext } from '../../utils/contexts/appContext';
+import { useGetGroupInvitesByUser } from '../../domain/services/groupInviteService';
 import { useNavigate } from 'react-router';
 
 const UserMenu = () => {
     const { user } = useAppContext() ?? {};
+    const { data: userInvites, isLoading: isUserInvitesLoading } =
+        useGetGroupInvitesByUser(user?.profile?.user_id);
     const navigate = useNavigate();
     const [userMenuAnchorEl, setUserMenuAnchorEl] =
         useState<null | HTMLElement>(null);
@@ -47,16 +52,43 @@ const UserMenu = () => {
         navigate('/login');
     }, [navigate]);
 
+    const handleUserInvitesClick = useCallback(() => {
+        navigate('/groups/invited');
+    }, [navigate]);
+
+    const showUserInvites =
+        !isUserInvitesLoading && userInvites && userInvites.length > 0;
+
     return (
         <Fragment>
             <IconButton onClick={handleUserMenuOpen}>
-                <Avatar src={user?.profile?.avatar_url ?? undefined} />
+                <Badge
+                    variant="dot"
+                    invisible={!showUserInvites}
+                    color="info"
+                    overlap="circular"
+                >
+                    <Avatar src={user?.profile?.avatar_url ?? undefined} />
+                </Badge>
             </IconButton>
             <Menu
                 anchorEl={userMenuAnchorEl}
                 open={userMenuOpen}
                 onClose={handleUserMenuClose}
             >
+                {showUserInvites && (
+                    <MenuItem onClick={handleUserInvitesClick} selected>
+                        <ListItemIcon>
+                            <Badge
+                                badgeContent={userInvites.length}
+                                color="info"
+                            >
+                                <GroupAddIcon sx={{ color: 'primary.main' }} />
+                            </Badge>
+                        </ListItemIcon>
+                        invites
+                    </MenuItem>
+                )}
                 <MenuItem onClick={handleUserProfileModalOpen}>
                     <ListItemIcon>
                         <AccountCircle sx={{ color: 'primary.main' }} />

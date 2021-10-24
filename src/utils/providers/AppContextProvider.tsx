@@ -6,6 +6,7 @@ import {
 } from '../../domain/services/userProfileService';
 
 import { Auth } from '@supabase/ui';
+import { getGroupInvitesByUserKey } from '../../domain/services/groupInviteService';
 import { queryClient } from '../config/queryClient';
 import { supabaseClient } from '../config/supabase';
 
@@ -24,6 +25,7 @@ export const AppContextProvider: FC = ({ children }) => {
             ...state,
             user: { profile: data ?? null, loading: isLoading },
         }));
+        if (data) queryClient.invalidateQueries(getGroupInvitesByUserKey);
     }, [data, isLoading]);
 
     useEffect(() => {
