@@ -53,7 +53,7 @@ const NavBar: FC<NavBarProps> = ({ onMenuClick, onLogout }) => {
     );
 
     return (
-        <Box sx={{ flexGrow: 1, mb: 2 }}>
+        <Box sx={{ flexGrow: 1, mb: 2 }} id="nav-menu">
             <AppBar color="primary" position="fixed">
                 <Toolbar>
                     <IconButton

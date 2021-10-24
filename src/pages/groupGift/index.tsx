@@ -25,6 +25,7 @@ const GroupGift = () => {
     const { group_id } = useParams();
     const pageQuery = usePageQuery();
     const queryMemberId = pageQuery.get('group_member_id');
+    const queryUserId = pageQuery.get('user_id');
     const navigate = useNavigate();
 
     const [selectedMember, setSelectedMember] =
@@ -66,6 +67,15 @@ const GroupGift = () => {
         }
     }, [data, navigate, resolvedGroupId, resolvedQueryMemberId]);
 
+    useEffect(() => {
+        if (queryUserId && data) {
+            const selected = data.members.find(m => m.user_id === queryUserId);
+            navigate(
+                `/group-gift/${resolvedGroupId}?group_member_id=${selected?.group_member_id}`,
+            );
+        }
+    }, [data, navigate, queryUserId, resolvedGroupId]);
+
     if (isLoading) {
         return <DataLoadingSpinner />;
     } else if (!data) {
@@ -103,6 +113,7 @@ const GroupGift = () => {
                 ownerProfile={data.user}
                 groupImage={data.image_url}
                 groupName={data.name}
+                groupDate={data.due_date}
             />
         );
     };

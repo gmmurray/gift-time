@@ -1,11 +1,69 @@
-import { Gift, GiftWithClaim, GiftsTable } from '../entities/Gift';
+import * as groupMemberService from './groupMemberService';
+
+import {
+    Gift,
+    GiftWithClaim,
+    GiftWithUser,
+    GiftWithUserAndGroups,
+    GiftsTable,
+} from '../entities/Gift';
 import { useMutation, useQuery } from 'react-query';
 
+import { PriorityTypeEnum } from '../../lib/constants/priorityTypes';
 import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime';
 import { queryClient } from '../../utils/config/queryClient';
 import { supabaseClient } from '../../utils/config/supabase';
 
 //#region get
+const getPriorityGiftsKey = 'get-priority-gifts';
+// gets all the high priority gifts (not including the current user) that belong to
+// users with which the current user shares a group membership
+const getPriorityGifts = async (user_id?: string) => {
+    if (!user_id) return [];
+    // get all the groups the current user is a member of
+    const memberships = await groupMemberService.getGroupMembersByUser(user_id);
+    const groupIds = memberships.map(m => m.group_id);
+
+    // get all the users that are in those groups minus the current user
+    const otherMembers =
+        await groupMemberService.getGroupMembersByGroupsWithoutCurrUser(
+            groupIds,
+            user_id,
+        );
+    const otherUserIds = otherMembers.map(m => m.user_id);
+
+    // get all the gifts belonging to those users where priority = high and not private
+    const { data, error } = await supabaseClient
+        .from<GiftWithUser>(GiftsTable)
+        .select('*, user:user_id (*)')
+        .in('user_id', otherUserIds)
+        .match({ is_private: false, priority: PriorityTypeEnum.high })
+        .limit(5)
+        .order('created_at', { ascending: false });
+
+    if (error) throw error.message;
+
+    const mutuals: { [key: string]: { id: number; name: string }[] } = {};
+    otherMembers.forEach(
+        m =>
+            (mutuals[m.user_id] = [
+                ...(mutuals[m.user_id] ?? []),
+                { id: m.group_id, name: m.groups.name },
+            ]),
+    );
+
+    return (data ?? []).map(gift => ({
+        ...gift,
+        groups: mutuals[gift.user_id],
+    })) as GiftWithUserAndGroups[];
+};
+
+export const useGetPriorityGifts = (user_id?: string) =>
+    useQuery(getPriorityGiftsKey, () => getPriorityGifts(user_id), {
+        enabled: !!user_id,
+        staleTime: defaultQueryCacheTime,
+    });
+
 const getOwnSingleGiftKey = (gift_id?: number) =>
     `get-own-single-gift${gift_id ? `-${gift_id}` : ''}`;
 const getOwnSingleGift = async (gift_id?: number, user_id?: string) => {

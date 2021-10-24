@@ -194,6 +194,23 @@ export const useGetGroupGift = (group_id?: number, user_id?: string) =>
         enabled: !!group_id && !!user_id,
         retry: 0,
     });
+
+const getUpcomingGroupsKey = 'get-upcoming-groups';
+const getUpcomingGroups = async (user_id?: string) => {
+    if (!user_id) return [];
+    const groupMembers = await groupMemberService.getUpcomingGroupMembers(
+        user_id,
+        5,
+    );
+    return groupMembers.map(m => m.groups);
+};
+
+export const useGetUpcomingGroups = (user_id?: string) =>
+    useQuery(getUpcomingGroupsKey, () => getUpcomingGroups(user_id), {
+        staleTime: defaultQueryCacheTime,
+        enabled: !!user_id,
+        retry: 0,
+    });
 //#endregion
 
 //#region create

@@ -3,6 +3,7 @@ import * as groupInviteService from './groupInviteService';
 import { Group, GroupsTable } from '../entities/Group';
 import {
     GroupMember,
+    GroupMemberWithGroup,
     GroupMemberWithProfile,
     GroupMembersTable,
 } from '../entities/GroupMember';
@@ -15,6 +16,32 @@ import { queryClient } from '../../utils/config/queryClient';
 import { supabaseClient } from '../../utils/config/supabase';
 
 //#region get
+export const getGroupMembersByUser = async (user_id?: string) => {
+    if (!user_id) return [];
+    const { data, error } = await supabaseClient
+        .from<GroupMember>(GroupMembersTable)
+        .select()
+        .match({ user_id });
+
+    if (error) throw error.message;
+
+    return data ?? [];
+};
+
+export const getGroupMembersByGroupsWithoutCurrUser = async (
+    groupIds: number[],
+    user_id?: string,
+) => {
+    if (!user_id) return [];
+    const { data, error } = await supabaseClient
+        .from<GroupMemberWithGroup>(GroupMembersTable)
+        .select('*, groups:group_id (*)')
+        .in('group_id', groupIds)
+        .not('user_id', 'eq', user_id);
+    if (error) throw error.message;
+
+    return data ?? [];
+};
 export const getGroupGiftMembers = async (
     group_id?: number,
     user_id?: string,
@@ -70,6 +97,26 @@ export const getGroupMember = async (user_id?: string, group_id?: number) => {
     if (error) throw error.message;
 
     return data;
+};
+
+// retrieves group members ordered by their corresponding group due dates
+export const getUpcomingGroupMembers = async (
+    user_id?: string,
+    limit?: number,
+) => {
+    if (!user_id) return [];
+
+    const { data, error } = await supabaseClient
+        .from<GroupMemberWithGroup>(GroupMembersTable)
+        .select('*, groups:group_id(*)')
+        .match({ user_id })
+        // @ts-ignore
+        .order('due_date', { foreignTable: 'groups', ascending: false })
+        .limit(limit ?? 25);
+
+    if (error) throw error.message;
+
+    return data ?? [];
 };
 //#endregion
 

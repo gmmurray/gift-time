@@ -27,6 +27,7 @@ import {
 } from '../../utils/groupGift/memberFilter';
 import { Sort, Tune } from '@mui/icons-material';
 
+import { Box } from '@mui/system';
 import CardGiftcardIcon from '@mui/icons-material/CardGiftcard';
 import GroupMemberList from './GroupMemberList';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -42,12 +43,14 @@ type MainContentProps = {
     ownerProfile: UserProfile;
     groupImage: string | null;
     groupName: string;
+    groupDate: Date;
 };
 
 const MainContent: FC<MainContentProps> = ({
     ownerProfile,
     groupImage,
     groupName,
+    groupDate,
 }) => {
     const { members } = useGroupGiftContext();
     const [filteredMembers, setFilteredMembers] = useState(
@@ -190,6 +193,11 @@ const MainContent: FC<MainContentProps> = ({
                 subheaderTypographyProps={{
                     variant: 'subtitle1',
                 }}
+                action={
+                    <Box sx={{ mr: 1, fontStyle: 'italic' }}>
+                        ends {groupDate}
+                    </Box>
+                }
             />
             <CardMedia
                 component="img"

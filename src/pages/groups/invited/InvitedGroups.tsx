@@ -98,6 +98,7 @@ const InvitedGroups = () => {
                                 : avatar_url;
                         return (
                             <Grid
+                                key={invite.group_invite_id}
                                 item
                                 xs={12}
                                 container

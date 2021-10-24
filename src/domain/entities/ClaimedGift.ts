@@ -1,4 +1,5 @@
 import { DbEntity } from './DbEntity';
+import { GiftWithUser } from './Gift';
 import { StatusTypeEnum } from '../../lib/types/StatusTypeEnum';
 import { UserProfile } from './UserProfile';
 
@@ -11,4 +12,8 @@ export interface ClaimedGift extends DbEntity {
 
 export interface ClaimedGiftWithUser extends ClaimedGift {
     claimed_by_user: UserProfile;
+}
+
+export interface ClaimedGiftWithGift extends ClaimedGift {
+    gift: GiftWithUser;
 }
