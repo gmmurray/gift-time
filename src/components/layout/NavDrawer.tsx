@@ -8,7 +8,7 @@ import {
     SwipeableDrawer,
     useTheme,
 } from '@mui/material';
-import { FC, Fragment, ReactElement, useCallback, useState } from 'react';
+import { Fragment, ReactElement, useCallback, useState } from 'react';
 
 import Add from '@mui/icons-material/Add';
 import CardGiftcard from '@mui/icons-material/CardGiftcard';
@@ -21,14 +21,10 @@ import People from '@mui/icons-material/People';
 import PeopleOutline from '@mui/icons-material/PeopleOutline';
 import Public from '@mui/icons-material/Public';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { useLayoutContext } from '../../utils/contexts/layoutContext';
 import { useNavigate } from 'react-router';
 
 const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-type NavDrawerProps = {
-    open: boolean;
-    onToggle: (value: boolean) => void;
-};
 
 type FolderState = {
     [key: string]: boolean;
@@ -96,7 +92,8 @@ const folders: DrawerFolder[] = [
     },
 ];
 
-const NavDrawer: FC<NavDrawerProps> = ({ open, onToggle }) => {
+const NavDrawer = () => {
+    const { isNavDrawerOpen, onNavDrawerToggle } = useLayoutContext();
     const navigate = useNavigate();
     const theme = useTheme();
 
@@ -105,10 +102,10 @@ const NavDrawer: FC<NavDrawerProps> = ({ open, onToggle }) => {
 
     const handleRouteClick = useCallback(
         (route: string) => {
-            onToggle(false);
+            onNavDrawerToggle(false);
             navigate(route);
         },
-        [navigate, onToggle],
+        [navigate, onNavDrawerToggle],
     );
 
     const handleFolderToggle = useCallback(
@@ -124,9 +121,9 @@ const NavDrawer: FC<NavDrawerProps> = ({ open, onToggle }) => {
             disableBackdropTransition={!iOS}
             disableDiscovery={iOS}
             anchor="left"
-            open={open}
-            onClose={() => onToggle(false)}
-            onOpen={() => onToggle(true)}
+            open={isNavDrawerOpen}
+            onClose={() => onNavDrawerToggle(false)}
+            onOpen={() => onNavDrawerToggle(true)}
         >
             <List
                 component="nav"
