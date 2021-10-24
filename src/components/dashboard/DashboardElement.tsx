@@ -47,7 +47,7 @@ const DashboardElement: FC<DashboardElementProps> = ({
                     justifyContent="center"
                     alignItems="center"
                     direction="column"
-                    sx={{ minHeight: '125%' }}
+                    sx={{ mt: 4 }}
                 >
                     <Grid item xs={6}>
                         <Typography variant="body1">no data</Typography>
