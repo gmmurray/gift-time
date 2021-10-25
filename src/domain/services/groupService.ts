@@ -316,3 +316,33 @@ export const useDeleteGroup = () =>
         },
     });
 //#endregion
+
+//#region other
+// returns the group if the user is the owner; else null
+const getGroupWithEditAccess = async (group_id?: number, user_id?: string) => {
+    if (!group_id || !user_id) return null;
+    const { data, error } = await supabaseClient
+        .from<Group>(GroupsTable)
+        .select()
+        .match({ group_id, owner_id: user_id });
+
+    if (error) throw error.message;
+
+    return data ? data[0] : null;
+};
+
+const getGroupWithEditAccessKey = getGroupWithEditAccess.name;
+export const useGetGroupWithEditAccess = (
+    group_id?: number,
+    user_id?: string,
+) =>
+    useQuery(
+        getGroupWithEditAccessKey,
+        () => getGroupWithEditAccess(group_id, user_id),
+        {
+            staleTime: defaultQueryCacheTime,
+            enabled: !!user_id && !!group_id,
+            retry: 0,
+        },
+    );
+//#endregion
