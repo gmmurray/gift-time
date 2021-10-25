@@ -31,7 +31,7 @@ import {
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Auth } from '@supabase/ui';
 import CloseIcon from '@mui/icons-material/Close';
-import { GiftWithClaim } from '../../domain/entities/Gift';
+import { GiftWithClaimUser } from '../../domain/entities/Gift';
 import GroupIcon from '@mui/icons-material/Group';
 import InfoIcon from '@mui/icons-material/Info';
 import LaunchIcon from '@mui/icons-material/Launch';
@@ -50,7 +50,7 @@ const statusButtonOptions = ['claim', 'purchase', 'purchased', 'unclaim'];
 
 type SelectedGiftProps = {
     onDeselect: () => any;
-    gift: GiftWithClaim | null;
+    gift: GiftWithClaimUser | null;
     currentUserId: string;
 };
 

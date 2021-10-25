@@ -1,6 +1,7 @@
 import * as giftService from './giftService';
 import * as groupMemberService from './groupMemberService';
 
+import { GiftWithClaimUser, GiftWithGroupMembers } from '../entities/Gift';
 import { Group, GroupGiftResult, GroupsTable } from '../entities/Group';
 import { GroupInvite, GroupInvitesTable } from '../entities/GroupInvite';
 import {
@@ -10,7 +11,6 @@ import {
 } from '../entities/GroupMember';
 import { useMutation, useQuery } from 'react-query';
 
-import { GiftWithClaim } from '../entities/Gift';
 import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime';
 import { getGroupInvitesByUserKey } from './groupInviteService';
 import { queryClient } from '../../utils/config/queryClient';
@@ -169,7 +169,7 @@ const getGroupGift = async (group_id?: number, user_id?: string) => {
 
     const members = groupMembers.map(gm => ({
         ...gm,
-        gifts: [] as GiftWithClaim[],
+        gifts: [] as GiftWithClaimUser[],
     }));
 
     // assign gifts to respective members
@@ -211,6 +211,49 @@ export const useGetUpcomingGroups = (user_id?: string) =>
         enabled: !!user_id,
         retry: 0,
     });
+
+// get the status of the groups owned by the given user
+const getMyGroupsStatuses = async (user_id?: string) => {
+    if (!user_id) return [];
+
+    // get all the groups the current user is a member of
+    const memberships = await groupMemberService.getGroupMembersByUser(user_id);
+    const groups = memberships.map(m => m.groups);
+
+    const group_ids = groups.map(g => g.group_id);
+
+    // get all the gifts (not including user) related to users in these groups
+    const gifts = await giftService.getAllGiftsInGroups(group_ids, user_id);
+
+    const result: { group: Group; gifts: GiftWithGroupMembers[] }[] = (
+        groups ?? []
+    )
+        .filter(g => new Date(g.due_date) >= new Date())
+        .map(g => ({
+            group: { ...g },
+            gifts: gifts
+                .filter(gift =>
+                    gift.members.some(m => m.group_id === g.group_id),
+                )
+                .filter(
+                    (value, index, self) =>
+                        self.findIndex(gm => gm.gift_id === value.gift_id) ===
+                        index,
+                ),
+        }))
+        .sort((a, b) => (a.gifts.length > b.gifts.length ? -1 : 1))
+        .slice(0, 3);
+    return result;
+};
+const getMyGroupStatusesKey = getMyGroupsStatuses.name;
+
+export const useGetMyGroupStatuses = (user_id?: string) =>
+    useQuery(getMyGroupStatusesKey, () => getMyGroupsStatuses(user_id), {
+        staleTime: defaultQueryCacheTime,
+        enabled: !!user_id,
+        retry: 0,
+    });
+
 //#endregion
 
 //#region create

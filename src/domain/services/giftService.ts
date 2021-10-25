@@ -2,19 +2,55 @@ import * as groupMemberService from './groupMemberService';
 
 import {
     Gift,
-    GiftWithClaim,
+    GiftWithClaimUser,
+    GiftWithGroupMembers,
     GiftWithUser,
     GiftWithUserAndGroups,
     GiftsTable,
 } from '../entities/Gift';
 import { useMutation, useQuery } from 'react-query';
 
+import { GroupMember } from '../entities/GroupMember';
 import { PriorityTypeEnum } from '../../lib/constants/priorityTypes';
 import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime';
 import { queryClient } from '../../utils/config/queryClient';
 import { supabaseClient } from '../../utils/config/supabase';
 
 //#region get
+export const getAllGiftsInGroups = async (
+    group_ids: number[],
+    user_id?: string,
+) => {
+    if (!user_id) return [];
+    // get all the users that are in these groups minus the current user
+    const otherMembers =
+        await groupMemberService.getGroupMembersByGroupsWithoutCurrUser(
+            group_ids,
+            user_id,
+        );
+
+    const memberLookup: { [id: string]: GroupMember[] } = {};
+
+    otherMembers.forEach(m => {
+        memberLookup[m.user_id] = [...(memberLookup[m.user_id] ?? []), m];
+    });
+
+    const otherUserIds = [...Object.keys(memberLookup)];
+
+    const { data, error } = await supabaseClient
+        .from<Gift>(GiftsTable)
+        .select('*, claimed_by:claimed_gift_id(*)')
+        .in('user_id', otherUserIds)
+        .match({ is_private: false });
+
+    if (error) throw error.message;
+
+    return (data ?? []).map(gift => ({
+        ...gift,
+        members: memberLookup[gift.user_id],
+    })) as GiftWithGroupMembers[];
+};
+
 const getPriorityGiftsKey = 'get-priority-gifts';
 // gets all the high priority gifts (not including the current user) that belong to
 // users with which the current user shares a group membership
@@ -127,7 +163,7 @@ export const useGetOwnGifts = (user_id?: string, is_private?: boolean) =>
 
 export const getGroupGifts = async (member_ids: string[], user_id?: string) => {
     const { data, error } = await supabaseClient
-        .from<GiftWithClaim>(GiftsTable)
+        .from<GiftWithClaimUser>(GiftsTable)
         .select(
             '*, claimed_by:claimed_gift_id(*, claimed_by_user:claimed_by (*))',
         )

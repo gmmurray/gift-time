@@ -1,5 +1,7 @@
-import { ClaimedGiftWithUser } from './ClaimedGift';
+import { ClaimedGift, ClaimedGiftWithUser } from './ClaimedGift';
+
 import { DbEntity } from './DbEntity';
+import { GroupMember } from './GroupMember';
 import { PriorityTypeEnum } from '../../lib/constants/priorityTypes';
 import { UserProfile } from './UserProfile';
 
@@ -16,8 +18,12 @@ export interface Gift extends DbEntity {
     priority: PriorityTypeEnum;
 }
 
-export interface GiftWithClaim extends Gift {
+export interface GiftWithClaimUser extends Gift {
     claimed_by?: ClaimedGiftWithUser;
+}
+
+export interface GiftWithClaim extends Gift {
+    claimed_by?: ClaimedGift;
 }
 
 export interface GiftWithUser extends Gift {
@@ -26,4 +32,8 @@ export interface GiftWithUser extends Gift {
 
 export interface GiftWithUserAndGroups extends GiftWithUser {
     groups: { id: number; name: string }[];
+}
+
+export interface GiftWithGroupMembers extends GiftWithClaim {
+    members: GroupMember[];
 }

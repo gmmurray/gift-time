@@ -19,8 +19,8 @@ import { supabaseClient } from '../../utils/config/supabase';
 export const getGroupMembersByUser = async (user_id?: string) => {
     if (!user_id) return [];
     const { data, error } = await supabaseClient
-        .from<GroupMember>(GroupMembersTable)
-        .select()
+        .from<GroupMemberWithGroup>(GroupMembersTable)
+        .select('*, groups:group_id(*)')
         .match({ user_id });
 
     if (error) throw error.message;

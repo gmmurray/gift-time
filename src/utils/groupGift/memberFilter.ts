@@ -1,4 +1,4 @@
-import { GiftWithClaim } from '../../domain/entities/Gift';
+import { GiftWithClaimUser } from '../../domain/entities/Gift';
 import { GroupGiftMember } from '../../domain/entities/GroupMember';
 
 export type OrderBy = 'claimed-gifts' | 'requested-gifts' | 'name' | null;
@@ -37,7 +37,7 @@ export type FilterMenuItem = {
 
 export const getSearchClause = (search: string, display_name: string) =>
     display_name.toLocaleLowerCase().includes(search.toLocaleLowerCase());
-export const getRefineClause = (refine: Refine, gifts: GiftWithClaim[]) => {
+export const getRefineClause = (refine: Refine, gifts: GiftWithClaimUser[]) => {
     if (!refine) return true;
     else if (refine === 'available') {
         return gifts.some(g => !g.claimed_by);

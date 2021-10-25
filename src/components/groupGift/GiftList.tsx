@@ -19,7 +19,7 @@ import { Auth } from '@supabase/ui';
 import { Box } from '@mui/system';
 import DataError from '../shared/DataError';
 import { FC } from 'react';
-import { GiftWithClaim } from '../../domain/entities/Gift';
+import { GiftWithClaimUser } from '../../domain/entities/Gift';
 import TooltipButton from '../shared/TooltipButton';
 import { defaultBgColor } from '../../lib/constants/styles';
 import { formatCurrency } from '../../utils/helpers/formatCurrency';
@@ -27,7 +27,7 @@ import { getStatusText } from '../../lib/constants/statusType';
 import { useGroupGiftContext } from '../../utils/contexts/groupGiftContext';
 
 type GiftListProps = {
-    gifts: GiftWithClaim[];
+    gifts: GiftWithClaimUser[];
     onSelect: (gift_id: number | null) => any;
 };
 
@@ -42,7 +42,7 @@ const GiftList: FC<GiftListProps> = ({ gifts, onSelect }) => {
 
     return (
         <Grid container spacing={2}>
-            {gifts.map((g: GiftWithClaim) => {
+            {gifts.map((g: GiftWithClaimUser) => {
                 const status_id = g.claimed_by?.status_id;
                 const claimedByUser = g.claimed_by?.claimed_by;
                 const showClaimedByUser =

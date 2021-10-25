@@ -22,6 +22,7 @@ const ViewGroup = () => {
         [],
     );
 
+    // TODO: need to implement an access check here
     return (
         <BasicPaperContainer>
             <PageTitle>group details</PageTitle>

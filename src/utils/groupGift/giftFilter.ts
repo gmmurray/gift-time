@@ -1,4 +1,4 @@
-import { GiftWithClaim } from '../../domain/entities/Gift';
+import { GiftWithClaimUser } from '../../domain/entities/Gift';
 import { PriorityTypeEnum } from '../../lib/constants/priorityTypes';
 
 export type GiftFilter = {
@@ -15,24 +15,24 @@ export const defaultGiftFilter: GiftFilter = {
     priority: false,
 };
 
-const getSearchClause = (search: string, gift: GiftWithClaim) =>
+const getSearchClause = (search: string, gift: GiftWithClaimUser) =>
     gift.name.toLocaleLowerCase().includes(search.toLocaleLowerCase());
-const getAvailableClause = (available: boolean, gift: GiftWithClaim) =>
+const getAvailableClause = (available: boolean, gift: GiftWithClaimUser) =>
     available ? gift.claimed_by === null : true;
 const getClaimedByUserClause = (
     claimedByUser: boolean,
     user_id: string,
-    gift: GiftWithClaim,
+    gift: GiftWithClaimUser,
 ) =>
     claimedByUser
         ? gift.claimed_by && gift.claimed_by.claimed_by === user_id
         : true;
-const getPriorityClause = (priority: boolean, gift: GiftWithClaim) =>
+const getPriorityClause = (priority: boolean, gift: GiftWithClaimUser) =>
     priority ? gift.priority === PriorityTypeEnum.high : true;
 
 export const applyFilter = (
     filter: GiftFilter,
-    gifts: GiftWithClaim[],
+    gifts: GiftWithClaimUser[],
     user_id: string,
 ) => {
     const { search, available, claimedByUser, priority } = filter;
@@ -46,5 +46,7 @@ export const applyFilter = (
     );
 };
 
-export const applyDefaultFilter = (gifts: GiftWithClaim[], user_id: string) =>
-    applyFilter(defaultGiftFilter, gifts, user_id);
+export const applyDefaultFilter = (
+    gifts: GiftWithClaimUser[],
+    user_id: string,
+) => applyFilter(defaultGiftFilter, gifts, user_id);

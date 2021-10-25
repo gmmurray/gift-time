@@ -21,7 +21,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { Auth } from '@supabase/ui';
 import GiftList from './GiftList';
-import { GiftWithClaim } from '../../domain/entities/Gift';
+import { GiftWithClaimUser } from '../../domain/entities/Gift';
 import { Navigate } from 'react-router';
 import SearchIcon from '@mui/icons-material/Search';
 import SelectedGift from './SelectedGift';
@@ -40,7 +40,7 @@ const GroupMember = () => {
     );
     const [filter, setFilter] = useState<GiftFilter>(defaultGiftFilter);
 
-    const [selectedGift, setSelectedGift] = useState<GiftWithClaim | null>(
+    const [selectedGift, setSelectedGift] = useState<GiftWithClaimUser | null>(
         null,
     );
 
