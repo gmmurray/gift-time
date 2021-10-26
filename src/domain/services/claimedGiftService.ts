@@ -52,7 +52,7 @@ const getUserSpending = async (
 
     if (error) throw error.message;
 
-    if (!data) return null;
+    if (!data || data.length === 0) return null;
 
     return {
         range,
