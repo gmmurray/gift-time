@@ -50,7 +50,7 @@ const LandingPage = () => {
                 <Paper
                     elevation={2}
                     sx={{
-                        pt: 8,
+                        pt: 6,
                         pb: 6,
                     }}
                 >
@@ -88,55 +88,49 @@ const LandingPage = () => {
                         </Box>
                     </Container>
                 </Paper>
-                <Container maxWidth="xl" sx={{ pb: 8, pt: 4 }}>
-                    <Grid container spacing={4}>
-                        {landingPageCards.map(
-                            ({ image, heading, content, path }, index) => (
-                                <Grid item key={index} xs={12} sm={6}>
-                                    <Card
-                                        elevation={2}
+                <Grid container spacing={2} sx={{ pt: 2 }}>
+                    {landingPageCards.map(
+                        ({ image, heading, content, path }, index) => (
+                            <Grid item key={index} xs={12} sm={6}>
+                                <Card
+                                    elevation={2}
+                                    sx={{
+                                        height: '100%',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                    }}
+                                >
+                                    <CardMedia
+                                        image={image}
+                                        title={`${heading} image`}
                                         sx={{
-                                            height: '100%',
-                                            display: 'flex',
-                                            flexDirection: 'column',
+                                            paddingTop: SIXTEEN_BY_NINE_PADDING,
                                         }}
-                                    >
-                                        <CardMedia
-                                            image={image}
-                                            title={`${heading} image`}
-                                            sx={{
-                                                paddingTop:
-                                                    SIXTEEN_BY_NINE_PADDING,
-                                            }}
-                                        />
-                                        <CardContent sx={{ flexGrow: 1 }}>
-                                            <Typography
-                                                gutterBottom
-                                                variant="h5"
+                                    />
+                                    <CardContent sx={{ flexGrow: 1 }}>
+                                        <Typography gutterBottom variant="h5">
+                                            {heading}
+                                        </Typography>
+                                        <Typography>{content}</Typography>
+                                    </CardContent>
+                                    {isLoggedIn && (
+                                        <CardActions>
+                                            <Button
+                                                size="small"
+                                                color="secondary"
+                                                variant="contained"
+                                                component={Link}
+                                                to={path}
                                             >
-                                                {heading}
-                                            </Typography>
-                                            <Typography>{content}</Typography>
-                                        </CardContent>
-                                        {isLoggedIn && (
-                                            <CardActions>
-                                                <Button
-                                                    size="small"
-                                                    color="secondary"
-                                                    variant="contained"
-                                                    component={Link}
-                                                    to={path}
-                                                >
-                                                    view
-                                                </Button>
-                                            </CardActions>
-                                        )}
-                                    </Card>
-                                </Grid>
-                            ),
-                        )}
-                    </Grid>
-                </Container>
+                                                view
+                                            </Button>
+                                        </CardActions>
+                                    )}
+                                </Card>
+                            </Grid>
+                        ),
+                    )}
+                </Grid>
             </Container>
         </Fragment>
     );
