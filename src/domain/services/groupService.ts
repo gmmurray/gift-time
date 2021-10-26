@@ -114,7 +114,7 @@ const getJoinedGroup = async (group_id?: number, user_id?: string) => {
     if (!group_id || !user_id) return null;
     const { data, error } = await supabaseClient
         .from<GroupMemberWithGroup>(GroupMembersTable)
-        .select('*, groups (*, user:owner_id (*))')
+        .select('*, group:group_id (*, user:owner_id (*))')
         .match({ user_id, group_id })
         .single();
 
@@ -129,14 +129,14 @@ const getJoinedGroups = async (user_id?: string) => {
 
     const { data: memberData, error: memberError } = await supabaseClient
         .from<GroupMemberWithGroup>(GroupMembersTable)
-        .select('*, groups (*, user:owner_id (*))')
+        .select('*, group:group_id (*, user:owner_id (*))')
         .match({ user_id, is_owner: false });
 
     if (memberError) throw memberError.message;
 
     if (!memberData || memberData.length === 0) return [];
 
-    return memberData.map(m => m.groups);
+    return memberData.map(m => m.group);
 };
 
 export const useGetJoinedGroups = (user_id?: string) =>
@@ -181,7 +181,7 @@ const getGroupGift = async (group_id?: number, user_id?: string) => {
     });
 
     const result: GroupGiftResult = {
-        ...groupMemberWithGroup.groups,
+        ...groupMemberWithGroup.group,
         members,
     };
 
@@ -202,7 +202,7 @@ const getUpcomingGroups = async (user_id?: string) => {
         user_id,
         5,
     );
-    return groupMembers.map(m => m.groups);
+    return groupMembers.map(m => m.group);
 };
 
 export const useGetUpcomingGroups = (user_id?: string) =>
@@ -218,7 +218,7 @@ const getMyGroupsStatuses = async (user_id?: string) => {
 
     // get all the groups the current user is a member of
     const memberships = await groupMemberService.getGroupMembersByUser(user_id);
-    const groups = memberships.map(m => m.groups);
+    const groups = memberships.map(m => m.group);
 
     const group_ids = groups.map(g => g.group_id);
 

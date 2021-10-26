@@ -1,19 +1,84 @@
-import { GridSize, Skeleton } from '@mui/material';
+import { Connector, Label, Series, Size } from 'devextreme-react/chart';
+import DashboardElement, { DashboardElementMenuItem } from './DashboardElement';
+import { FC, useState } from 'react';
+import { GridSize, useMediaQuery } from '@mui/material';
 
-import DashboardElement from './DashboardElement';
-import { FC } from 'react';
+import { Auth } from '@supabase/ui';
+import { PieChart } from 'devextreme-react';
+import { SpendingRange } from '../../lib/types/UserSpending';
+import { formatCurrency } from '../../utils/helpers/formatCurrency';
+import { useGetUserSpending } from '../../domain/services/claimedGiftService';
+import { useTheme } from '@mui/system';
+
+const viewTypeNames: { [key: number]: string } = {
+    [SpendingRange.week]: 'week',
+    [SpendingRange.month]: 'month',
+    [SpendingRange.year]: 'year',
+    [SpendingRange.lifetime]: 'all time',
+};
+
+const customizeText = ({ value }: { value: number }) => `$${value}`;
 
 type SpendingProps = {
     size: GridSize;
 };
 
 const Spending: FC<SpendingProps> = ({ size }) => {
+    const [spendingRange, setDateRange] = useState(SpendingRange.lifetime);
+    const { user } = Auth.useUser();
+    const { data, isLoading } = useGetUserSpending(spendingRange, user?.id);
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+    const title = `spending - ${viewTypeNames[spendingRange]}`;
+    const isNoData = !data;
+
+    const menuItems: DashboardElementMenuItem[] = [
+        {
+            text: 'week',
+            onClick: () => setDateRange(SpendingRange.week),
+            selected: spendingRange === SpendingRange.week,
+        },
+        {
+            text: 'month',
+            onClick: () => setDateRange(SpendingRange.month),
+            selected: spendingRange === SpendingRange.month,
+        },
+        {
+            text: 'year',
+            onClick: () => setDateRange(SpendingRange.year),
+            selected: spendingRange === SpendingRange.year,
+        },
+        {
+            text: 'all time',
+            onClick: () => setDateRange(SpendingRange.lifetime),
+            selected: spendingRange === SpendingRange.lifetime,
+        },
+    ];
+
     return (
-        <DashboardElement row={2} title="spending" size={size}>
-            <Skeleton variant="text" sx={{ mb: 2 }} />
-            <Skeleton variant="text" sx={{ mb: 2 }} />
-            <Skeleton variant="text" sx={{ mb: 2 }} />
-            <Skeleton variant="text" />
+        <DashboardElement
+            row={2}
+            title={title}
+            size={size}
+            isLoading={isLoading}
+            isNoData={isNoData}
+            menuItems={menuItems}
+        >
+            <PieChart
+                dataSource={data?.dataPoints}
+                palette="Pastel"
+                title={`$${formatCurrency(data?.total ?? 0)} total`}
+                legend={{ visible: !isMobile }}
+            >
+                <Series argumentField="name" valueField="amount">
+                    <Label visible={true} customizeText={customizeText}>
+                        <Connector visible={true} width={1} />
+                    </Label>
+                </Series>
+                <Size height={175} />
+            </PieChart>
         </DashboardElement>
     );
 };

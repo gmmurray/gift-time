@@ -98,6 +98,7 @@ const MyGroupStatus: FC<MyGroupStatusProps> = ({ size }) => {
                     ).length;
                     return (
                         <GroupGiftProgress
+                            key={group.group_id}
                             group={group.name}
                             numerator={value}
                             denominator={total}

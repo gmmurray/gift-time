@@ -39,7 +39,7 @@ const UpcomingGroups: FC<UpcomingGroupsProps> = ({ size }) => {
             isNoData={isNoData}
         >
             <List sx={{ pt: 0 }}>
-                <ListItem component={Grid} container spacing={1}>
+                <ListItem component={Grid} container spacing={1} sx={{ pt: 0 }}>
                     <Grid item xs={6}>
                         <Typography fontWeight="bold">group</Typography>
                     </Grid>
@@ -50,8 +50,7 @@ const UpcomingGroups: FC<UpcomingGroupsProps> = ({ size }) => {
                     </Grid>
                 </ListItem>
                 <Divider />
-                {(data ?? []).map(({ name, due_date, group_id }, index) => {
-                    const hideDivider = index === (data?.length ?? 0) - 1;
+                {(data ?? []).map(({ name, due_date, group_id }) => {
                     const onClick = () => handleGroupNavigate(group_id);
                     return (
                         <Fragment key={group_id}>
@@ -79,7 +78,6 @@ const UpcomingGroups: FC<UpcomingGroupsProps> = ({ size }) => {
                                     <Typography>{due_date}</Typography>
                                 </Grid>
                             </ListItem>
-                            {!hideDivider && <Divider />}
                         </Fragment>
                     );
                 })}

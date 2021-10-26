@@ -120,10 +120,22 @@ const DashboardElement: FC<DashboardElementProps> = ({
                 >
                     {menuItems.map(
                         ({ text, onClick, selected, isDivider }, index) => {
-                            if (isDivider && index !== 0) return <Divider />;
+                            if (isDivider && index !== 0)
+                                return <Divider key={index} />;
+
+                            const handleClick = () => {
+                                if (onClick) {
+                                    onClick();
+                                    handleMenuClose();
+                                }
+                            };
 
                             return (
-                                <MenuItem selected={selected} onClick={onClick}>
+                                <MenuItem
+                                    key={index}
+                                    selected={selected}
+                                    onClick={handleClick}
+                                >
                                     {text}
                                 </MenuItem>
                             );

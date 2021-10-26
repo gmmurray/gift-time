@@ -2,6 +2,7 @@ import '@fontsource/raleway/300.css';
 import '@fontsource/raleway/400.css';
 import '@fontsource/raleway/500.css';
 import '@fontsource/raleway/700.css';
+import 'devextreme/dist/css/dx.light.compact.css';
 
 import { CssBaseline, ThemeProvider } from '@mui/material';
 

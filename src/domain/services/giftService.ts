@@ -84,7 +84,7 @@ const getPriorityGifts = async (user_id?: string) => {
         m =>
             (mutuals[m.user_id] = [
                 ...(mutuals[m.user_id] ?? []),
-                { id: m.group_id, name: m.groups.name },
+                { id: m.group_id, name: m.group.name },
             ]),
     );
 

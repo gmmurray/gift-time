@@ -8,6 +8,7 @@ export interface ClaimedGift extends DbEntity {
     gift_id: number;
     status_id: StatusTypeEnum;
     claimed_by: string;
+    modified_at: Date;
 }
 
 export interface ClaimedGiftWithUser extends ClaimedGift {

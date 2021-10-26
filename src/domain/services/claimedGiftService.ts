@@ -1,8 +1,10 @@
+import { SpendingRange, UserSpending } from '../../lib/types/UserSpending';
 import { useMutation, useQuery } from 'react-query';
 
 import { ClaimedGiftWithGift } from '../entities/ClaimedGift';
 import { StatusTypeEnum } from '../../lib/types/StatusTypeEnum';
 import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime';
+import { getDateRange } from '../../utils/helpers/dateRange';
 import { getGroupGiftKey } from './groupService';
 import { queryClient } from '../../utils/config/queryClient';
 import { supabaseClient } from '../../utils/config/supabase';
@@ -29,6 +31,47 @@ export const useGetMostRecentPurchase = (user_id?: string) =>
     useQuery(getMostRecentPurchaseKey, () => getMostRecentPurchase(user_id), {
         staleTime: defaultQueryCacheTime,
         retry: 0,
+        enabled: !!user_id,
+    });
+
+const getUserSpending = async (
+    range: SpendingRange,
+    user_id?: string,
+): Promise<UserSpending | null> => {
+    if (!user_id) return null;
+
+    const dateRange = getDateRange(range);
+
+    const { data, error } = await supabaseClient
+        .from<ClaimedGiftWithGift>(ClaimedGiftsTable)
+        .select('*, gift:gift_id (*)')
+        .match({ claimed_by: user_id, status_id: StatusTypeEnum.purchased })
+        .gte('modified_at', dateRange.start.toISOString())
+        .lt('modified_at', dateRange.end.toISOString())
+        .order('modified_at', { ascending: true });
+
+    if (error) throw error.message;
+
+    if (!data) return null;
+
+    return {
+        range,
+        user_id,
+        total: data
+            .map(cg => cg.gift.price)
+            .reduce((total, current) => total + current),
+        dataPoints: data.map(cg => ({
+            date: cg.modified_at,
+            amount: cg.gift.price,
+            name: cg.gift.name,
+        })),
+    };
+};
+const getUserSpendingKey = (range: SpendingRange) =>
+    `${getUserSpending.name}-${range}`;
+export const useGetUserSpending = (range: SpendingRange, user_id?: string) =>
+    useQuery(getUserSpendingKey(range), () => getUserSpending(range, user_id), {
+        staleTime: defaultQueryCacheTime,
         enabled: !!user_id,
     });
 

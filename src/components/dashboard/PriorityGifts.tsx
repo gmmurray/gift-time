@@ -70,23 +70,21 @@ const PriorityGifts: FC<PriorityGiftsProps> = ({ size }) => {
                     pt: 0,
                 }}
             >
-                <ListItem>
-                    <Grid container>
-                        <Grid item xs={4}>
-                            <Typography sx={{ fontWeight: 'bold' }}>
-                                gift
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={4} textAlign="right">
-                            <Typography sx={{ fontWeight: 'bold' }}>
-                                user
-                            </Typography>
-                        </Grid>
-                        <Grid item xs={4} textAlign="right">
-                            <Typography sx={{ fontWeight: 'bold' }}>
-                                group
-                            </Typography>
-                        </Grid>
+                <ListItem component={Grid} container sx={{ pt: 0 }}>
+                    <Grid item xs={4}>
+                        <Typography sx={{ fontWeight: 'bold' }}>
+                            gift
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={4} textAlign="right">
+                        <Typography sx={{ fontWeight: 'bold' }}>
+                            user
+                        </Typography>
+                    </Grid>
+                    <Grid item xs={4} textAlign="right">
+                        <Typography sx={{ fontWeight: 'bold' }}>
+                            group
+                        </Typography>
                     </Grid>
                 </ListItem>
                 <Divider />

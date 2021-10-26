@@ -22,5 +22,9 @@ export interface GroupGiftMember extends GroupMember {
 }
 
 export interface GroupMemberWithGroup extends GroupMember {
-    groups: GroupWithUser;
+    group: GroupWithUser;
+}
+
+export interface GroupMemberWithGroupAndUser extends GroupMemberWithGroup {
+    user: UserProfile;
 }

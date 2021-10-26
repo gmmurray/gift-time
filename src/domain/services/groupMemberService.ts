@@ -4,6 +4,7 @@ import { Group, GroupsTable } from '../entities/Group';
 import {
     GroupMember,
     GroupMemberWithGroup,
+    GroupMemberWithGroupAndUser,
     GroupMemberWithProfile,
     GroupMembersTable,
 } from '../entities/GroupMember';
@@ -20,7 +21,7 @@ export const getGroupMembersByUser = async (user_id?: string) => {
     if (!user_id) return [];
     const { data, error } = await supabaseClient
         .from<GroupMemberWithGroup>(GroupMembersTable)
-        .select('*, groups:group_id(*)')
+        .select('*, group:group_id(*)')
         .match({ user_id });
 
     if (error) throw error.message;
@@ -35,7 +36,7 @@ export const getGroupMembersByGroupsWithoutCurrUser = async (
     if (!user_id) return [];
     const { data, error } = await supabaseClient
         .from<GroupMemberWithGroup>(GroupMembersTable)
-        .select('*, groups:group_id (*)')
+        .select('*, group:group_id (*)')
         .in('group_id', groupIds)
         .not('user_id', 'eq', user_id);
     if (error) throw error.message;
@@ -108,7 +109,7 @@ export const getUpcomingGroupMembers = async (
 
     const { data, error } = await supabaseClient
         .from<GroupMemberWithGroup>(GroupMembersTable)
-        .select('*, groups:group_id(*)')
+        .select('*, group:group_id(*)')
         .match({ user_id })
         // @ts-ignore
         .order('due_date', { foreignTable: 'groups', ascending: false })
@@ -118,6 +119,43 @@ export const getUpcomingGroupMembers = async (
 
     return data ?? [];
 };
+
+/**
+ * gets new members in groups the user has access to
+ * @param user_id
+ */
+const getNewMembers = async (user_id?: string) => {
+    if (!user_id) return [];
+
+    // get the groups this user has access to
+    const groups = ((await getGroupMembersByUser(user_id)) ?? []).map(
+        m => m.group,
+    );
+    if (groups.length === 0) return [];
+
+    // get the members of those groups, not including given user
+    const group_ids = groups.map(g => g.group_id);
+
+    const { data, error } = await supabaseClient
+        .from<GroupMemberWithGroupAndUser>(GroupMembersTable)
+        .select('*, group:group_id (*), user:user_id (*)')
+        .in('group_id', group_ids)
+        .not('user_id', 'eq', user_id)
+        .match({ is_owner: false })
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+    if (error) throw error.message;
+
+    return data ?? [];
+};
+const getNewMembersKey = getNewMembers.name;
+export const useGetNewMembers = (user_id?: string) =>
+    useQuery(getNewMembersKey, () => getNewMembers(user_id), {
+        staleTime: defaultQueryCacheTime,
+        enabled: !!user_id,
+        retry: 0,
+    });
 //#endregion
 
 //#region create
