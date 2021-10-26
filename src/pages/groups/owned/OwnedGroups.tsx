@@ -4,9 +4,9 @@ import { NavigateFunction, useNavigate } from 'react-router';
 
 import { Auth } from '@supabase/ui';
 import BasicPaperContainer from '../../../components/shared/BasicPaperContainer';
-import EditIcon from '@mui/icons-material/Edit';
 import HomeIcon from '@mui/icons-material/Home';
 import PageTitle from '../../../components/shared/PageTitle';
+import SettingsIcon from '@mui/icons-material/Settings';
 import TooltipButton from '../../../components/shared/TooltipButton';
 import { useGetOwnedGroups } from '../../../domain/services/groupService';
 
@@ -49,7 +49,7 @@ const getTableCols = (navigate: NavigateFunction): GridColDef[] => [
                 <Fragment>
                     <TooltipButton
                         text="edit group"
-                        icon={EditIcon}
+                        icon={SettingsIcon}
                         onClick={onViewClick}
                     />
                     <TooltipButton
