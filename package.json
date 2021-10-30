@@ -1,69 +1,69 @@
 {
-  "name": "gift-time",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@emotion/react": "^11.4.1",
-    "@emotion/styled": "^11.3.0",
-    "@fontsource/raleway": "^4.5.0",
-    "@hookform/resolvers": "2.8.0",
-    "@mui/icons-material": "^5.0.1",
-    "@mui/lab": "^5.0.0-alpha.49",
-    "@mui/material": "^5.0.2",
-    "@mui/styles": "^5.0.1",
-    "@mui/x-data-grid": "^5.0.0-beta.3",
-    "@supabase/supabase-js": "^1.24.0",
-    "@supabase/ui": "^0.35.0",
-    "@testing-library/jest-dom": "^5.11.4",
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.10",
-    "@types/jest": "^26.0.15",
-    "@types/node": "^12.0.0",
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
-    "clsx": "^1.1.1",
-    "date-fns": "^2.25.0",
-    "devextreme": "21.1",
-    "devextreme-react": "21.1",
-    "history": "^5.0.1",
-    "notistack": "^2.0.2",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-hook-form": "7.15.2",
-    "react-number-format": "^4.7.3",
-    "react-query": "^3.25.0",
-    "react-router": "^6.0.0-beta.5",
-    "react-router-dom": "^6.0.0-beta.5",
-    "react-scripts": "4.0.3",
-    "typescript": "^4.4.4",
-    "web-vitals": "^1.0.1",
-    "yup": "^0.32.9"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "@types/react-router": "^5.1.16"
-  }
+    "name": "gift-time",
+    "version": "0.1.0",
+    "private": true,
+    "dependencies": {
+        "@emotion/react": "^11.4.1",
+        "@emotion/styled": "^11.3.0",
+        "@fontsource/raleway": "^4.5.0",
+        "@hookform/resolvers": "2.8.0",
+        "@mui/icons-material": "^5.0.1",
+        "@mui/lab": "^5.0.0-alpha.49",
+        "@mui/material": "^5.0.2",
+        "@mui/styles": "^5.0.1",
+        "@mui/x-data-grid": "^5.0.0-beta.3",
+        "@supabase/supabase-js": "^1.24.0",
+        "@supabase/ui": "^0.35.0",
+        "@testing-library/jest-dom": "^5.11.4",
+        "@testing-library/react": "^11.1.0",
+        "@testing-library/user-event": "^12.1.10",
+        "@types/jest": "^26.0.15",
+        "@types/node": "^12.0.0",
+        "@types/react": "^17.0.0",
+        "@types/react-dom": "^17.0.0",
+        "clsx": "^1.1.1",
+        "date-fns": "^2.25.0",
+        "devextreme": "21.1",
+        "devextreme-react": "21.1",
+        "history": "^5.0.1",
+        "notistack": "^2.0.2",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
+        "react-hook-form": "7.15.2",
+        "react-number-format": "^4.7.3",
+        "react-query": "^3.25.0",
+        "react-router": "^6.0.0-beta.5",
+        "react-router-dom": "^6.0.0-beta.5",
+        "react-scripts": "4.0.3",
+        "typescript": "^4.4.4",
+        "web-vitals": "^1.0.1",
+        "yup": "^0.32.9"
+    },
+    "scripts": {
+        "start": "react-scripts --max-old-space-size=4096 start",
+        "build": "react-scripts --max-old-space-size=4096 build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app",
+            "react-app/jest"
+        ]
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "devDependencies": {
+        "@types/react-router": "^5.1.16"
+    }
 }
