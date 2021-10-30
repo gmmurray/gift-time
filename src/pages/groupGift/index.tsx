@@ -3,7 +3,7 @@ import {
     IGroupGiftContext,
 } from '../../utils/contexts/groupGiftContext';
 import {
-    getGroupGiftKey,
+    groupQueryKeys,
     useGetGroupGift,
 } from '../../domain/services/groupService';
 import { useCallback, useEffect, useState } from 'react';
@@ -52,7 +52,10 @@ const GroupGift = () => {
     );
 
     const handleReloadGroup = useCallback(
-        () => queryClient.invalidateQueries(getGroupGiftKey(resolvedGroupId)),
+        () =>
+            queryClient.invalidateQueries(
+                groupQueryKeys.groupGift(resolvedGroupId),
+            ),
         [resolvedGroupId],
     );
 

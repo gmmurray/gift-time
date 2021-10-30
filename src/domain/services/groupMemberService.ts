@@ -12,9 +12,22 @@ import { useMutation, useQuery } from 'react-query';
 
 import { GroupInvite } from '../entities/GroupInvite';
 import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime';
-import { getJoinedGroupsKey } from './groupService';
+import { groupQueryKeys } from './groupService';
 import { queryClient } from '../../utils/config/queryClient';
 import { supabaseClient } from '../../utils/config/supabase';
+
+export const groupMemberQueryKeys = {
+    all: [GroupMembersTable] as const,
+    lists: () => [...groupMemberQueryKeys.all, 'list'] as const,
+    list: (name: string, ...args: any[]) =>
+        [...groupMemberQueryKeys.lists(), { name, ...args }] as const,
+    query: (...args: any[]) =>
+        [...groupMemberQueryKeys.lists(), { ...args }] as const,
+    newMembers: (user_id?: string) =>
+        [...groupMemberQueryKeys.list('new-members', user_id)] as const,
+    details: () => [...groupMemberQueryKeys.all, 'detail'] as const,
+    detail: (id?: number) => [...groupMemberQueryKeys.details(), id] as const,
+};
 
 //#region get
 export const getGroupMembersByUser = async (user_id?: string) => {
@@ -60,10 +73,6 @@ export const getGroupGiftMembers = async (
     return data ?? [];
 };
 
-export const getGroupMembersByGroupKey = (group_id?: number) =>
-    group_id
-        ? `get-group-members-by-group-${group_id}`
-        : 'get-group-members-by-group';
 const getGroupMembersByGroup = async (group_id?: number) => {
     if (!group_id) return;
     const { data, error } = await supabaseClient
@@ -78,7 +87,7 @@ const getGroupMembersByGroup = async (group_id?: number) => {
 
 export const useGetGroupMembersByGroup = (group_id?: number) =>
     useQuery(
-        getGroupMembersByGroupKey(group_id),
+        groupMemberQueryKeys.query(group_id),
         () => getGroupMembersByGroup(group_id),
         {
             staleTime: defaultQueryCacheTime,
@@ -149,13 +158,16 @@ const getNewMembers = async (user_id?: string) => {
 
     return data ?? [];
 };
-const getNewMembersKey = getNewMembers.name;
 export const useGetNewMembers = (user_id?: string) =>
-    useQuery(getNewMembersKey, () => getNewMembers(user_id), {
-        staleTime: defaultQueryCacheTime,
-        enabled: !!user_id,
-        retry: 0,
-    });
+    useQuery(
+        groupMemberQueryKeys.newMembers(user_id),
+        () => getNewMembers(user_id),
+        {
+            staleTime: defaultQueryCacheTime,
+            enabled: !!user_id,
+            retry: 0,
+        },
+    );
 //#endregion
 
 //#region create
@@ -190,10 +202,8 @@ export const useDeleteGroupMember = () =>
     useMutation(
         (group_member_id: number) => deleteGroupMember(group_member_id),
         {
-            onSuccess: data =>
-                queryClient.invalidateQueries(
-                    getGroupMembersByGroupKey(data![0].group_id),
-                ),
+            onSuccess: () =>
+                queryClient.invalidateQueries(groupMemberQueryKeys.lists()),
         },
     );
 //#endregion
@@ -232,9 +242,9 @@ export const useAcceptGroupInvite = () =>
     useMutation((invite: GroupInvite) => acceptGroupInvite(invite), {
         onSuccess: () => {
             queryClient.invalidateQueries(
-                groupInviteService.getGroupInvitesByUserKey,
+                groupInviteService.groupInviteQueryKeys.lists(),
             );
-            queryClient.invalidateQueries(getJoinedGroupsKey);
+            queryClient.invalidateQueries(groupQueryKeys.joined());
         },
     });
 //#endregion

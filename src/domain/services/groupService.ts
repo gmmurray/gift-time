@@ -12,13 +12,32 @@ import {
 import { useMutation, useQuery } from 'react-query';
 
 import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime';
-import { getGroupInvitesByUserKey } from './groupInviteService';
+import { groupInviteQueryKeys } from './groupInviteService';
 import { queryClient } from '../../utils/config/queryClient';
 import { supabaseClient } from '../../utils/config/supabase';
 
+export const groupQueryKeys = {
+    all: [GroupsTable] as const,
+    lists: () => [...groupQueryKeys.all, 'list'] as const,
+    list: (name: string, ...args: any[]) =>
+        [...groupQueryKeys.lists(), { name, ...args }] as const,
+    query: (...args: any[]) =>
+        [...groupQueryKeys.lists(), { ...args }] as const,
+    owned: (owner_id?: string) =>
+        [...groupQueryKeys.list('owned', owner_id)] as const,
+    joined: (user_id?: string) =>
+        [...groupQueryKeys.list('joined', user_id)] as const,
+    groupGift: (group_id?: number) =>
+        [...groupQueryKeys.list('group-gift', group_id)] as const,
+    upcoming: (user_id?: string) =>
+        [...groupQueryKeys.list('upcoming', user_id)] as const,
+    statuses: (user_id?: string) =>
+        [...groupQueryKeys.list('statuses', user_id)] as const,
+    details: () => [...groupQueryKeys.all, 'detail'] as const,
+    detail: (id?: number) => [...groupQueryKeys.details(), id] as const,
+};
+
 //#region get
-export const getGroupKey = (group_id?: number) =>
-    group_id ? `get-group-${group_id}` : 'get-group';
 const getGroup = async (group_id: number, owner_id?: string) => {
     if (!owner_id) return;
     const { data, error } = await supabaseClient
@@ -33,13 +52,16 @@ const getGroup = async (group_id: number, owner_id?: string) => {
 };
 
 export const useGetGroup = (group_id: number, owner_id?: string) =>
-    useQuery(getGroupKey(group_id), () => getGroup(group_id, owner_id), {
-        enabled: !!owner_id,
-        retry: 2,
-        staleTime: defaultQueryCacheTime,
-    });
+    useQuery(
+        groupQueryKeys.detail(group_id),
+        () => getGroup(group_id, owner_id),
+        {
+            enabled: !!owner_id,
+            retry: 2,
+            staleTime: defaultQueryCacheTime,
+        },
+    );
 
-export const getOwnedGroupsKey = 'get-owned-groups';
 const getOwnedGroups = async (owner_id?: string) => {
     if (!owner_id) return;
     const groups = await supabaseClient
@@ -105,7 +127,7 @@ const getOwnedGroups = async (owner_id?: string) => {
 };
 
 export const useGetOwnedGroups = (owner_id?: string) =>
-    useQuery(getOwnedGroupsKey, () => getOwnedGroups(owner_id), {
+    useQuery(groupQueryKeys.owned(owner_id), () => getOwnedGroups(owner_id), {
         staleTime: defaultQueryCacheTime,
         enabled: !!owner_id,
     });
@@ -123,7 +145,6 @@ const getJoinedGroup = async (group_id?: number, user_id?: string) => {
     return data;
 };
 
-export const getJoinedGroupsKey = 'get-joined-groups';
 const getJoinedGroups = async (user_id?: string) => {
     if (!user_id) return [];
 
@@ -140,13 +161,11 @@ const getJoinedGroups = async (user_id?: string) => {
 };
 
 export const useGetJoinedGroups = (user_id?: string) =>
-    useQuery(getJoinedGroupsKey, () => getJoinedGroups(user_id), {
+    useQuery(groupQueryKeys.joined(user_id), () => getJoinedGroups(user_id), {
         staleTime: defaultQueryCacheTime,
         enabled: !!user_id,
     });
 
-export const getGroupGiftKey = (group_id?: number) =>
-    'load-group-gift' + (group_id ? `-${group_id}` : '');
 const getGroupGift = async (group_id?: number, user_id?: string) => {
     if (!group_id || !user_id) return null;
 
@@ -189,13 +208,16 @@ const getGroupGift = async (group_id?: number, user_id?: string) => {
 };
 
 export const useGetGroupGift = (group_id?: number, user_id?: string) =>
-    useQuery(getGroupGiftKey(group_id), () => getGroupGift(group_id, user_id), {
-        staleTime: defaultQueryCacheTime,
-        enabled: !!group_id && !!user_id,
-        retry: 0,
-    });
+    useQuery(
+        groupQueryKeys.groupGift(group_id),
+        () => getGroupGift(group_id, user_id),
+        {
+            staleTime: defaultQueryCacheTime,
+            enabled: !!group_id && !!user_id,
+            retry: 0,
+        },
+    );
 
-const getUpcomingGroupsKey = 'get-upcoming-groups';
 const getUpcomingGroups = async (user_id?: string) => {
     if (!user_id) return [];
     const groupMembers = await groupMemberService.getUpcomingGroupMembers(
@@ -206,11 +228,15 @@ const getUpcomingGroups = async (user_id?: string) => {
 };
 
 export const useGetUpcomingGroups = (user_id?: string) =>
-    useQuery(getUpcomingGroupsKey, () => getUpcomingGroups(user_id), {
-        staleTime: defaultQueryCacheTime,
-        enabled: !!user_id,
-        retry: 0,
-    });
+    useQuery(
+        groupQueryKeys.upcoming(user_id),
+        () => getUpcomingGroups(user_id),
+        {
+            staleTime: defaultQueryCacheTime,
+            enabled: !!user_id,
+            retry: 0,
+        },
+    );
 
 // get the status of the groups owned by the given user
 const getMyGroupsStatuses = async (user_id?: string) => {
@@ -245,14 +271,17 @@ const getMyGroupsStatuses = async (user_id?: string) => {
         .slice(0, 3);
     return result;
 };
-const getMyGroupStatusesKey = getMyGroupsStatuses.name;
 
 export const useGetMyGroupStatuses = (user_id?: string) =>
-    useQuery(getMyGroupStatusesKey, () => getMyGroupsStatuses(user_id), {
-        staleTime: defaultQueryCacheTime,
-        enabled: !!user_id,
-        retry: 0,
-    });
+    useQuery(
+        groupQueryKeys.statuses(user_id),
+        () => getMyGroupsStatuses(user_id),
+        {
+            staleTime: defaultQueryCacheTime,
+            enabled: !!user_id,
+            retry: 0,
+        },
+    );
 
 //#endregion
 
@@ -273,7 +302,7 @@ const createGroup = async (group: Partial<Group>) => {
 
 export const useCreateGroup = () =>
     useMutation((group: Partial<Group>) => createGroup(group), {
-        onSuccess: () => queryClient.invalidateQueries(getOwnedGroupsKey),
+        onSuccess: () => queryClient.invalidateQueries(groupQueryKeys.lists()),
     });
 //#endregion
 
@@ -291,8 +320,10 @@ const updateGroup = async (group: Group) => {
 export const useUpdateGroup = () =>
     useMutation((group: Group) => updateGroup(group), {
         onSuccess: group => {
-            queryClient.invalidateQueries(getGroupKey(group![0].group_id));
-            queryClient.invalidateQueries(getOwnedGroupsKey);
+            queryClient.invalidateQueries(
+                groupQueryKeys.detail(group![0].group_id),
+            );
+            queryClient.invalidateQueries(groupQueryKeys.lists());
         },
     });
 //#endregion
@@ -311,8 +342,8 @@ const deleteGroup = async (group_id: number) => {
 export const useDeleteGroup = () =>
     useMutation((group_id: number) => deleteGroup(group_id), {
         onSettled: () => {
-            queryClient.invalidateQueries(getOwnedGroupsKey);
-            queryClient.invalidateQueries(getGroupInvitesByUserKey);
+            queryClient.invalidateQueries(groupQueryKeys.all);
+            queryClient.invalidateQueries(groupInviteQueryKeys.all);
         },
     });
 //#endregion
@@ -331,13 +362,12 @@ const getGroupWithEditAccess = async (group_id?: number, user_id?: string) => {
     return data ? data[0] : null;
 };
 
-const getGroupWithEditAccessKey = getGroupWithEditAccess.name;
 export const useGetGroupWithEditAccess = (
     group_id?: number,
     user_id?: string,
 ) =>
     useQuery(
-        getGroupWithEditAccessKey,
+        groupQueryKeys.query(group_id, user_id),
         () => getGroupWithEditAccess(group_id, user_id),
         {
             staleTime: defaultQueryCacheTime,

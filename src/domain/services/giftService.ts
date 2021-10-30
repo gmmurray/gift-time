@@ -16,6 +16,22 @@ import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime
 import { queryClient } from '../../utils/config/queryClient';
 import { supabaseClient } from '../../utils/config/supabase';
 
+export const giftQueryKeys = {
+    all: [GiftsTable] as const,
+    lists: () => [...giftQueryKeys.all, 'list'] as const,
+    list: (name: string, ...args: any[]) =>
+        [...giftQueryKeys.lists(), { name, ...args }] as const,
+    priorityGifts: (user_id?: string) =>
+        [...giftQueryKeys.list('priority', user_id)] as const,
+    ownSingle: (gift_id?: number, user_id?: string) =>
+        [...giftQueryKeys.list('own-single', gift_id, user_id)] as const,
+    own: (is_private?: boolean, user_id?: string) => [
+        ...giftQueryKeys.list('own', is_private, user_id),
+    ],
+    details: () => [...giftQueryKeys.all, 'detail'] as const,
+    detail: (id?: number) => [...giftQueryKeys.details(), id] as const,
+};
+
 //#region get
 export const getAllGiftsInGroups = async (
     group_ids: number[],
@@ -51,7 +67,6 @@ export const getAllGiftsInGroups = async (
     })) as GiftWithGroupMembers[];
 };
 
-const getPriorityGiftsKey = 'get-priority-gifts';
 // gets all the high priority gifts (not including the current user) that belong to
 // users with which the current user shares a group membership
 const getPriorityGifts = async (user_id?: string) => {
@@ -95,13 +110,15 @@ const getPriorityGifts = async (user_id?: string) => {
 };
 
 export const useGetPriorityGifts = (user_id?: string) =>
-    useQuery(getPriorityGiftsKey, () => getPriorityGifts(user_id), {
-        enabled: !!user_id,
-        staleTime: defaultQueryCacheTime,
-    });
+    useQuery(
+        giftQueryKeys.priorityGifts(user_id),
+        () => getPriorityGifts(user_id),
+        {
+            enabled: !!user_id,
+            staleTime: defaultQueryCacheTime,
+        },
+    );
 
-const getOwnSingleGiftKey = (gift_id?: number) =>
-    `get-own-single-gift${gift_id ? `-${gift_id}` : ''}`;
 const getOwnSingleGift = async (gift_id?: number, user_id?: string) => {
     if (!user_id || !gift_id) return null;
 
@@ -120,7 +137,7 @@ const getOwnSingleGift = async (gift_id?: number, user_id?: string) => {
 
 export const useGetOwnSingleGift = (gift_id?: number, user_id?: string) =>
     useQuery(
-        getOwnSingleGiftKey(gift_id),
+        giftQueryKeys.ownSingle(gift_id, user_id),
         () => getOwnSingleGift(gift_id, user_id),
         {
             enabled: !!user_id && !!gift_id,
@@ -129,12 +146,6 @@ export const useGetOwnSingleGift = (gift_id?: number, user_id?: string) =>
         },
     );
 
-const getOwnGiftsKey = (is_private?: boolean) =>
-    is_private === undefined
-        ? 'get-own-gifts'
-        : `get-own-gifts?q=is_private=${
-              is_private === true ? 'true' : 'false'
-          }`;
 const getOwnGifts = async (user_id?: string, is_private?: boolean) => {
     if (!user_id) return [];
 
@@ -152,7 +163,7 @@ const getOwnGifts = async (user_id?: string, is_private?: boolean) => {
 
 export const useGetOwnGifts = (user_id?: string, is_private?: boolean) =>
     useQuery(
-        getOwnGiftsKey(is_private),
+        giftQueryKeys.own(is_private, user_id),
         () => getOwnGifts(user_id, is_private),
         {
             enabled: !!user_id,
@@ -193,8 +204,13 @@ const createGift = async (gift: Partial<Gift>) => {
 export const useCreateGift = () =>
     useMutation((gift: Partial<Gift>) => createGift(gift), {
         onSuccess: gift => {
-            queryClient.invalidateQueries(getOwnGiftsKey(gift?.is_private));
-            queryClient.invalidateQueries(getOwnSingleGiftKey(gift?.gift_id));
+            const { gift_id, is_private, user_id } = gift ?? {};
+            queryClient.invalidateQueries(
+                giftQueryKeys.own(is_private, user_id),
+            );
+            queryClient.invalidateQueries(
+                giftQueryKeys.ownSingle(gift_id, user_id),
+            );
         },
     });
 //#endregion
@@ -214,7 +230,12 @@ const updateGift = async (gift: Gift) => {
 export const useUpdateGift = () =>
     useMutation((gift: Gift) => updateGift(gift), {
         onSuccess: gift =>
-            queryClient.invalidateQueries(getOwnGiftsKey(gift?.is_private)),
+            queryClient.invalidateQueries(
+                giftQueryKeys.own(
+                    gift?.is_private ?? undefined,
+                    gift?.user_id ?? undefined,
+                ),
+            ),
     });
 
 //#endregion
@@ -240,7 +261,7 @@ export const useDeleteGift = () =>
             deleteGift(gift_id, user_id),
         {
             onSuccess: () => {
-                queryClient.invalidateQueries(getOwnGiftsKey());
+                queryClient.invalidateQueries(giftQueryKeys.lists());
             },
         },
     );

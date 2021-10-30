@@ -1,12 +1,12 @@
 import { AppContext, IAppContext } from '../contexts/appContext';
 import { FC, useEffect, useState } from 'react';
 import {
-    getCurrentUserProfileKey,
     useGetCurrentUserProfile,
+    userProfileQueryKeys,
 } from '../../domain/services/userProfileService';
 
 import { Auth } from '@supabase/ui';
-import { getGroupInvitesByUserKey } from '../../domain/services/groupInviteService';
+import { groupInviteQueryKeys } from '../../domain/services/groupInviteService';
 import { queryClient } from '../config/queryClient';
 import { supabaseClient } from '../config/supabase';
 
@@ -25,11 +25,11 @@ export const AppContextProvider: FC = ({ children }) => {
             ...state,
             user: { profile: data ?? null, loading: isLoading },
         }));
-        if (data) queryClient.invalidateQueries(getGroupInvitesByUserKey);
+        if (data) queryClient.invalidateQueries(groupInviteQueryKeys.lists());
     }, [data, isLoading]);
 
     useEffect(() => {
-        queryClient.invalidateQueries(getCurrentUserProfileKey);
+        queryClient.invalidateQueries(userProfileQueryKeys.details());
     }, [user]);
 
     useEffect(() => {

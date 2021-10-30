@@ -7,16 +7,23 @@ import {
 import { useMutation, useQuery } from 'react-query';
 
 import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime';
-import { getOwnedGroupsKey } from './groupService';
 import { getUserProfileByEmail } from './userProfileService';
+import { groupQueryKeys } from './groupService';
 import { queryClient } from '../../utils/config/queryClient';
 import { supabaseClient } from '../../utils/config/supabase';
 
+export const groupInviteQueryKeys = {
+    all: [GroupInvitesTable] as const,
+    lists: () => [...groupInviteQueryKeys.all, 'list'] as const,
+    query: (...args: any[]) =>
+        [...groupInviteQueryKeys.lists(), { ...args }] as const,
+    list: (name: string, ...args: any[]) =>
+        [...groupInviteQueryKeys.lists(), { name, ...args }] as const,
+    details: () => [...groupInviteQueryKeys.all, 'detail'] as const,
+    detail: (id?: number) => [...groupInviteQueryKeys.details(), id] as const,
+};
+
 //#region get
-export const getGroupInvitesByGroupKey = (group_id?: number) =>
-    group_id
-        ? `get-group-invites-by-group-${group_id}`
-        : 'get-group-invites-by-group';
 const getGroupInvitesByGroup = async (group_id?: number) => {
     if (!group_id) return;
     const { data, error } = await supabaseClient
@@ -30,7 +37,7 @@ const getGroupInvitesByGroup = async (group_id?: number) => {
 
 export const useGetGroupInvitesByGroup = (group_id?: number) =>
     useQuery(
-        getGroupInvitesByGroupKey(group_id),
+        groupInviteQueryKeys.query(group_id),
         () => getGroupInvitesByGroup(group_id),
         {
             staleTime: defaultQueryCacheTime,
@@ -39,7 +46,6 @@ export const useGetGroupInvitesByGroup = (group_id?: number) =>
         },
     );
 
-export const getGroupInvitesByUserKey = 'get-group-invites-by-user';
 const getGroupInvitesByUser = async (user_id?: string) => {
     if (!user_id) return;
     const { data, error } = await supabaseClient
@@ -52,10 +58,14 @@ const getGroupInvitesByUser = async (user_id?: string) => {
 };
 
 export const useGetGroupInvitesByUser = (user_id?: string) =>
-    useQuery(getGroupInvitesByUserKey, () => getGroupInvitesByUser(user_id), {
-        staleTime: defaultQueryCacheTime,
-        retry: 2,
-    });
+    useQuery(
+        groupInviteQueryKeys.query(user_id),
+        () => getGroupInvitesByUser(user_id),
+        {
+            staleTime: defaultQueryCacheTime,
+            retry: 2,
+        },
+    );
 //#endregion
 
 //#region delete
@@ -73,10 +83,8 @@ export const useDeleteGroupInvite = () =>
     useMutation(
         (group_invite_id: number) => deleteGroupInvite(group_invite_id),
         {
-            onSuccess: () => {
-                queryClient.invalidateQueries(getGroupInvitesByUserKey);
-                queryClient.invalidateQueries(getGroupInvitesByGroupKey());
-            },
+            onSuccess: () =>
+                queryClient.invalidateQueries(groupInviteQueryKeys.all),
         },
     );
 //#endregion
@@ -102,10 +110,10 @@ export const useInviteUserToGroup = () =>
             inviteUserToGroup(params.email, params.group_id),
         {
             onSuccess: data => {
-                queryClient.invalidateQueries(getOwnedGroupsKey);
                 queryClient.invalidateQueries(
-                    getGroupInvitesByGroupKey(data![0].group_id),
+                    groupQueryKeys.owned(data![0].user_id),
                 );
+                queryClient.invalidateQueries(groupInviteQueryKeys.lists());
             },
         },
     );

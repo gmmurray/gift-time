@@ -3,7 +3,7 @@ import {
     createSuccessMessage,
 } from '../../../utils/config/snackbar';
 import {
-    getGroupKey,
+    groupQueryKeys,
     useCreateGroup,
 } from '../../../domain/services/groupService';
 
@@ -49,7 +49,7 @@ const NewGroup = () => {
                     onSuccess: async result => {
                         if (result === null) return;
                         createSuccessMessage(enqueueSnackbar, 'group created');
-                        queryClient.invalidateQueries(getGroupKey());
+                        queryClient.invalidateQueries(groupQueryKeys.lists());
                         navigate(`/groups/view/${result[0].group_id}`);
                     },
                     onError: async () => {

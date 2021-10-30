@@ -5,11 +5,26 @@ import { ClaimedGiftWithGift } from '../entities/ClaimedGift';
 import { StatusTypeEnum } from '../../lib/types/StatusTypeEnum';
 import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime';
 import { getDateRange } from '../../utils/helpers/dateRange';
-import { getGroupGiftKey } from './groupService';
+import { groupQueryKeys } from './groupService';
 import { queryClient } from '../../utils/config/queryClient';
 import { supabaseClient } from '../../utils/config/supabase';
 
 export const ClaimedGiftsTable = 'claimed_gifts';
+
+export const claimedGiftQueryKeys = {
+    all: [ClaimedGiftsTable] as const,
+    lists: () => [...claimedGiftQueryKeys.all, 'list'] as const,
+    list: (name: string, ...args: any[]) =>
+        [...claimedGiftQueryKeys.lists(), { name, ...args }] as const,
+    mostRecentPurchase: (user_id?: string) => [
+        ...claimedGiftQueryKeys.list('', 'most-recent-purchase', user_id),
+    ],
+    userSpending: (range: SpendingRange, user_id?: string) => [
+        ...claimedGiftQueryKeys.list('user-spending', range, user_id),
+    ],
+    details: () => [...claimedGiftQueryKeys.all, 'detail'] as const,
+    detail: (id?: number) => [...claimedGiftQueryKeys.details(), id] as const,
+};
 
 const getMostRecentPurchase = async (user_id?: string) => {
     if (!user_id) return null;
@@ -25,14 +40,17 @@ const getMostRecentPurchase = async (user_id?: string) => {
 
     return data && data.length > 0 ? data[0] : null;
 };
-const getMostRecentPurchaseKey = getMostRecentPurchase.name + 'key';
 
 export const useGetMostRecentPurchase = (user_id?: string) =>
-    useQuery(getMostRecentPurchaseKey, () => getMostRecentPurchase(user_id), {
-        staleTime: defaultQueryCacheTime,
-        retry: 0,
-        enabled: !!user_id,
-    });
+    useQuery(
+        claimedGiftQueryKeys.mostRecentPurchase(user_id),
+        () => getMostRecentPurchase(user_id),
+        {
+            staleTime: defaultQueryCacheTime,
+            retry: 0,
+            enabled: !!user_id,
+        },
+    );
 
 const getUserSpending = async (
     range: SpendingRange,
@@ -67,13 +85,15 @@ const getUserSpending = async (
         })),
     };
 };
-const getUserSpendingKey = (range: SpendingRange) =>
-    `${getUserSpending.name}-${range}`;
 export const useGetUserSpending = (range: SpendingRange, user_id?: string) =>
-    useQuery(getUserSpendingKey(range), () => getUserSpending(range, user_id), {
-        staleTime: defaultQueryCacheTime,
-        enabled: !!user_id,
-    });
+    useQuery(
+        claimedGiftQueryKeys.userSpending(range),
+        () => getUserSpending(range, user_id),
+        {
+            staleTime: defaultQueryCacheTime,
+            enabled: !!user_id,
+        },
+    );
 
 type UpdateGiftStatusParams = {
     input_status_id: StatusTypeEnum | null;
@@ -108,5 +128,6 @@ const updateGiftStatus = async (params: UpdateGiftStatusParams) => {
 
 export const useUpdateGiftStatus = () =>
     useMutation((params: UpdateGiftStatusParams) => updateGiftStatus(params), {
-        onSuccess: () => queryClient.invalidateQueries(getGroupGiftKey()),
+        onSuccess: () =>
+            queryClient.invalidateQueries(groupQueryKeys.groupGift()),
     });
