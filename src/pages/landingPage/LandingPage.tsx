@@ -29,7 +29,7 @@ const landingPageCards: LandingPageCard[] = [
         heading: 'gifts',
         content:
             'this is your wish list. you can keep track of what you want - whether that is what you want to be given to you, or what you want to get for yourself.',
-        path: '/gifts',
+        path: '/gifts/public',
         image: '/images/landing-page/gifts.jpg',
     },
     {
