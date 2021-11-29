@@ -7,6 +7,7 @@ import NavDrawer from './NavDrawer';
 import PageTitleWrapper from './PageTitleWrapper';
 import RegistrationWrapper from '../auth/RegistrationWrapper';
 import ScrollTopButton from './ScrollTopButton';
+import VersionNoticeWrapper from '../auth/VersionNoticeWrapper';
 
 const Layout: FC = ({ children }) => (
     <LayoutProvider>
@@ -15,10 +16,12 @@ const Layout: FC = ({ children }) => (
             <NavDrawer />
             <main>
                 <RegistrationWrapper>
-                    <Container maxWidth="xl">
-                        <Fragment>{children}</Fragment>
-                    </Container>
-                    <ScrollTopButton />
+                    <VersionNoticeWrapper>
+                        <Container maxWidth="xl">
+                            <Fragment>{children}</Fragment>
+                        </Container>
+                        <ScrollTopButton />
+                    </VersionNoticeWrapper>
                 </RegistrationWrapper>
             </main>
         </PageTitleWrapper>

@@ -73,6 +73,29 @@ export const useUpdateUserProfile = () =>
         onSuccess: () =>
             queryClient.invalidateQueries(userProfileQueryKeys.details()),
     });
+
+const patchUserProfile = async (
+    user_id: string,
+    userProfile: Partial<UserProfile>,
+) => {
+    const { data, error } = await supabaseClient
+        .from<UserProfile>(UserProfilesTable)
+        .update(userProfile)
+        .match({ user_id });
+
+    if (error) throw error.message;
+    return data;
+};
+
+export const usePatchUserProfile = () =>
+    useMutation(
+        (request: { user_id: string; userProfile: Partial<UserProfile> }) =>
+            patchUserProfile(request.user_id, request.userProfile),
+        {
+            onSuccess: () =>
+                queryClient.invalidateQueries(userProfileQueryKeys.details()),
+        },
+    );
 //#endregion
 
 //#region other
