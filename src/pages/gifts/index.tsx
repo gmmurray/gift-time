@@ -4,6 +4,7 @@ import ResponsiveSideTabPage, {
 
 import Add from '@mui/icons-material/Add';
 import PublicIcon from '@mui/icons-material/Public';
+import SellIcon from '@mui/icons-material/Sell';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 const getGiftRoute = (fullRoute: string) => {
@@ -28,6 +29,12 @@ const listItems: TabPageListItem[] = [
         mobileName: 'private',
         path: 'private',
         icon: <VisibilityOffIcon />,
+    },
+    {
+        name: 'claimed gifts',
+        mobileName: 'claimed',
+        path: 'claimed',
+        icon: <SellIcon />,
     },
 ];
 

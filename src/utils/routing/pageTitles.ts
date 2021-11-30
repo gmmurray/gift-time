@@ -9,6 +9,7 @@ export const pageTitles: { [key: string]: string } = {
     '/gifts/public': 'public gifts',
     '/gifts/private': 'private gifts',
     '/gifts/view': 'view gift',
+    '/gifts/claimed': 'claimed gifts',
     '/group-gift': 'group gift',
     '/home': 'home',
     '*': 'not found',
