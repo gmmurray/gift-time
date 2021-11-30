@@ -1,6 +1,7 @@
 import { Location, State } from 'history';
 import { Navigate, RouteObject } from 'react-router';
 
+import ClaimedGifts from '../../pages/gifts/claimed/ClaimedGifts';
 import Dashboard from '../../pages/dashboard/Dashboard';
 import Gifts from '../../pages/gifts';
 import GroupGift from '../../pages/groupGift';
@@ -112,6 +113,10 @@ export const getRoutes = (
                 {
                     path: 'private',
                     element: showNestedPrivateElement(<PrivateGifts />),
+                },
+                {
+                    path: 'claimed',
+                    element: showNestedPrivateElement(<ClaimedGifts />),
                 },
                 {
                     path: 'view/:gift_id',

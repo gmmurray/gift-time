@@ -22,6 +22,9 @@ export const claimedGiftQueryKeys = {
     userSpending: (range: SpendingRange, user_id?: string) => [
         ...claimedGiftQueryKeys.list('user-spending', range, user_id),
     ],
+    userClaimed: (user_id?: string) => [
+        ...claimedGiftQueryKeys.list('user-claimed', user_id),
+    ],
     details: () => [...claimedGiftQueryKeys.all, 'detail'] as const,
     detail: (id?: number) => [...claimedGiftQueryKeys.details(), id] as const,
 };
@@ -95,6 +98,29 @@ export const useGetUserSpending = (range: SpendingRange, user_id?: string) =>
         },
     );
 
+const getUserClaimed = async (user_id?: string) => {
+    if (!user_id) return [];
+
+    const { data, error } = await supabaseClient
+        .from<ClaimedGiftWithGift>(ClaimedGiftsTable)
+        .select('*, gift:gift_id (*, user:user_id(*))')
+        .match({ claimed_by: user_id })
+        .order('modified_at', { ascending: true });
+
+    if (error) throw error.message;
+
+    return data ?? [];
+};
+export const useGetUserClaimed = (user_id?: string) =>
+    useQuery(
+        claimedGiftQueryKeys.userClaimed(user_id),
+        () => getUserClaimed(user_id),
+        {
+            staleTime: defaultQueryCacheTime,
+            enabled: !!user_id,
+        },
+    );
+
 type UpdateGiftStatusParams = {
     input_status_id: StatusTypeEnum | null;
     input_gift_id?: number;
@@ -128,6 +154,8 @@ const updateGiftStatus = async (params: UpdateGiftStatusParams) => {
 
 export const useUpdateGiftStatus = () =>
     useMutation((params: UpdateGiftStatusParams) => updateGiftStatus(params), {
-        onSuccess: () =>
-            queryClient.invalidateQueries(groupQueryKeys.groupGift()),
+        onSuccess: () => {
+            queryClient.invalidateQueries(groupQueryKeys.groupGift());
+            queryClient.invalidateQueries(claimedGiftQueryKeys.lists());
+        },
     });

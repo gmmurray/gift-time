@@ -20,6 +20,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import People from '@mui/icons-material/People';
 import PeopleOutline from '@mui/icons-material/PeopleOutline';
 import Public from '@mui/icons-material/Public';
+import SellIcon from '@mui/icons-material/Sell';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useLayoutContext } from '../../utils/contexts/layoutContext';
 import { useNavigate } from 'react-router';
@@ -87,6 +88,11 @@ const folders: DrawerFolder[] = [
                 name: 'private gifts',
                 route: '/gifts/private',
                 icon: <VisibilityOff />,
+            },
+            {
+                name: 'claimed gifts',
+                route: '/gifts/claimed',
+                icon: <SellIcon />,
             },
         ],
     },
