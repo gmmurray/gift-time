@@ -9,6 +9,7 @@ import {
 import { Fragment, useCallback, useState } from 'react';
 import {
     forgotPasswordSchema,
+    resetPasswordSchema,
     signInSchema,
     signupSchema,
 } from '../../utils/config/formSchema/auth';
@@ -34,19 +35,27 @@ type ForgotPasswordForm = {
     email: string;
 };
 
+type ResetPasswordForm = {
+    password: string;
+    confirmPassword: string;
+};
+
 const Login = () => {
     const location = useLocation();
     const query = usePageQuery();
     let navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
     const startWithSignUp = query.get('signup') === 'true';
+    const startWithResetPassword = query.get('type') === 'recovery';
 
     const [isSignUp, setIsSignUp] = useState(startWithSignUp);
     const [isForgotPassword, setIsForgotPassword] = useState(false);
+
     const [isLoading, setIsLoading] = useState(false);
 
     const forgotPasswordValidationSchema = forgotPasswordSchema;
     const loginSignupValidationSchema = isSignUp ? signupSchema : signInSchema;
+    const resetPasswordValidationSchema = resetPasswordSchema;
 
     const {
         register: registerForgotPassword,
@@ -64,6 +73,15 @@ const Login = () => {
         reset: resetLogin,
     } = useForm({
         resolver: yupResolver(loginSignupValidationSchema),
+    });
+
+    const {
+        register: registerResetPassword,
+        handleSubmit: handleResetPasswordFormSubmit,
+        formState: { errors: resetPasswordErrors },
+        reset: resetResetPassword,
+    } = useForm({
+        resolver: yupResolver(resetPasswordValidationSchema),
     });
 
     const handleSignUpToggle = useCallback(
@@ -88,7 +106,9 @@ const Login = () => {
     const handleEmailSignUp = useCallback(
         async ({ email, password }: LoginForm) => {
             await supabaseClient.auth.signUp({ email, password });
-            enqueueSnackbar('signed up', { variant: 'success' });
+            enqueueSnackbar('signed up - check your email', {
+                variant: 'success',
+            });
             const locationState = location.state as LocationStateType;
             if (locationState?.from) {
                 navigate(locationState.from.pathname);
@@ -128,9 +148,10 @@ const Login = () => {
         async (data: ForgotPasswordForm) => {
             setIsLoading(true);
             await supabaseClient.auth.api.resetPasswordForEmail(data.email);
+            enqueueSnackbar('reset email sent', { variant: 'success' });
             setIsLoading(false);
         },
-        [],
+        [enqueueSnackbar],
     );
 
     const handleForgotPasswordClick = useCallback(
@@ -143,8 +164,100 @@ const Login = () => {
         [isForgotPassword, resetForgotPassword, resetLogin],
     );
 
+    const handleResetPasswordSubmit = useCallback(
+        async (data: ResetPasswordForm) => {
+            const access_token = query.get('access_token');
+            setIsLoading(true);
+            const { error } = await supabaseClient.auth.api.updateUser(
+                access_token ?? '',
+                { password: data.password },
+            );
+            setIsLoading(false);
+
+            if (error) {
+                enqueueSnackbar('error updating your password', {
+                    variant: 'error',
+                });
+                return;
+            }
+
+            enqueueSnackbar('password updated', { variant: 'success' });
+            navigate('/');
+        },
+        [enqueueSnackbar, navigate, query],
+    );
+
+    const handleCancelResetPassword = useCallback(() => {
+        resetResetPassword();
+        resetForgotPassword();
+        resetLogin();
+        navigate('/login');
+    }, [navigate, resetForgotPassword, resetLogin, resetResetPassword]);
+
     const renderForm = () => {
-        if (isForgotPassword) {
+        if (startWithResetPassword) {
+            return (
+                <Fragment>
+                    <Grid item sx={styles.input}>
+                        <TextField
+                            type="password"
+                            {...registerResetPassword('password')}
+                            label="new password"
+                            fullWidth
+                            disabled={isLoading}
+                            error={!!resetPasswordErrors.password}
+                            helperText={resetPasswordErrors.password?.message}
+                        />
+                    </Grid>
+                    <Grid item sx={styles.input}>
+                        <TextField
+                            type="password"
+                            {...registerResetPassword('confirmPassword')}
+                            label="confirm password"
+                            fullWidth
+                            disabled={isLoading}
+                            error={!!resetPasswordErrors.confirmPassword}
+                            helperText={
+                                resetPasswordErrors.confirmPassword?.message
+                            }
+                        />
+                    </Grid>
+                    <Grid item sx={styles.input}>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            fullWidth
+                            color="primary"
+                            disabled={isLoading}
+                        >
+                            update password
+                        </Button>
+                    </Grid>
+                    <Grid item sx={styles.input}>
+                        <Button
+                            variant="text"
+                            fullWidth
+                            color="primary"
+                            disabled={isLoading}
+                            onClick={() => resetResetPassword()}
+                        >
+                            reset
+                        </Button>
+                    </Grid>
+                    <Grid item sx={styles.input}>
+                        <Button
+                            variant="text"
+                            fullWidth
+                            color="primary"
+                            disabled={isLoading}
+                            onClick={handleCancelResetPassword}
+                        >
+                            cancel
+                        </Button>
+                    </Grid>
+                </Fragment>
+            );
+        } else if (isForgotPassword) {
             return (
                 <Fragment>
                     <Grid item sx={styles.input}>
@@ -283,17 +396,16 @@ const Login = () => {
         }
     };
 
+    let onSubmit;
+    if (startWithResetPassword)
+        onSubmit = handleResetPasswordFormSubmit(handleResetPasswordSubmit);
+    else if (isForgotPassword)
+        onSubmit = handleForgotPasswordFormSubmit(handleForgotPasswordSubmit);
+    else onSubmit = handleLoginFormSubmit(handleLoginSubmit);
+
     return (
         <Container>
-            <form
-                onSubmit={
-                    isForgotPassword
-                        ? handleForgotPasswordFormSubmit(
-                              handleForgotPasswordSubmit,
-                          )
-                        : handleLoginFormSubmit(handleLoginSubmit)
-                }
-            >
+            <form onSubmit={onSubmit}>
                 <Grid
                     container
                     direction="column"

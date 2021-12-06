@@ -4,6 +4,7 @@ import {
     useGetCurrentUserProfile,
     userProfileQueryKeys,
 } from '../../domain/services/userProfileService';
+import { useLocation, useNavigate } from 'react-router';
 
 import { Auth } from '@supabase/ui';
 import { groupInviteQueryKeys } from '../../domain/services/groupInviteService';
@@ -16,7 +17,11 @@ export const AppContextProvider: FC = ({ children }) => {
     const [appState, setAppState] = useState<IAppContext | null>({
         user: { ...DEFAULT_USER_STATE },
     });
+    const [recoveryToken, setRecoveryToken] = useState<string | null>(null);
+
     const { user } = Auth.useUser();
+    const { hash } = useLocation();
+    const navigate = useNavigate();
 
     const { data, isLoading } = useGetCurrentUserProfile(user?.id);
 
@@ -33,6 +38,17 @@ export const AppContextProvider: FC = ({ children }) => {
     }, [user]);
 
     useEffect(() => {
+        if (hash !== '') {
+            const query = new URLSearchParams(hash.substring(1));
+            const isRecovery = query.get('type') === 'recovery';
+
+            if (isRecovery) {
+                setRecoveryToken(query.get('access_token') ?? null);
+            }
+        }
+    }, [hash, navigate]);
+
+    useEffect(() => {
         const { data: listener } = supabaseClient.auth.onAuthStateChange(
             async (event, session) => {
                 if (event === 'SIGNED_OUT') {
@@ -40,6 +56,11 @@ export const AppContextProvider: FC = ({ children }) => {
                         ...state,
                         user: { profile: null, loading: false },
                     }));
+                } else if (event === 'PASSWORD_RECOVERY') {
+                    await supabaseClient.auth.signOut();
+                    navigate(
+                        `/login?access_token=${recoveryToken}&type=recovery`,
+                    );
                 }
             },
         );
@@ -47,7 +68,7 @@ export const AppContextProvider: FC = ({ children }) => {
         return () => {
             listener?.unsubscribe();
         };
-    }, []);
+    }, [navigate, recoveryToken]);
 
     return (
         <AppContext.Provider value={appState}>{children}</AppContext.Provider>
