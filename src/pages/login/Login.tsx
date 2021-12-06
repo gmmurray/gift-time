@@ -302,10 +302,12 @@ const Login = () => {
                     sx={styles.container}
                 >
                     <Grid item>
-                        <LockIcon fontSize="large" />
+                        <LockIcon fontSize="large" color="primary" />
                     </Grid>
                     <Grid item>
-                        <Typography variant="h4">the game</Typography>
+                        <Typography variant="h4" color="primary">
+                            gift time
+                        </Typography>
                     </Grid>
                     {renderForm()}
                 </Grid>
