@@ -28,6 +28,14 @@ const RegisterForm: FC<RegisterFormProps> = ({
         <Grid container spacing={3}>
             <Grid item xs={12}>
                 <TextField
+                    {...onFieldRegister('email')}
+                    label="email address"
+                    fullWidth
+                    disabled
+                />
+            </Grid>
+            <Grid item xs={12}>
+                <TextField
                     {...onFieldRegister('display_name')}
                     label="display name*"
                     error={!!formErrors.display_name}
