@@ -70,6 +70,7 @@ const NewGroup = () => {
             <PageTitle>create a group</PageTitle>
             <GroupForm
                 onFormSubmit={handleSubmit(handleFormSubmit)}
+                // @ts-ignore
                 onRegister={register}
                 control={control}
                 formErrors={formErrors}

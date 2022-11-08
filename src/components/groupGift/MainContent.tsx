@@ -206,6 +206,7 @@ const MainContent: FC<MainContentProps> = ({
                 sx={{
                     maxHeight: '250px',
                     mx: 'auto',
+                    objectFit: 'contain'
                 }}
             />
             <CardContent>

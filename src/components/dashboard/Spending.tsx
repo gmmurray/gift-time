@@ -24,7 +24,7 @@ type SpendingProps = {
 };
 
 const Spending: FC<SpendingProps> = ({ size }) => {
-    const [spendingRange, setDateRange] = useState(SpendingRange.lifetime);
+    const [spendingRange, setDateRange] = useState(SpendingRange.year);
     const { user } = Auth.useUser();
     const { data, isLoading } = useGetUserSpending(spendingRange, user?.id);
 
@@ -66,17 +66,22 @@ const Spending: FC<SpendingProps> = ({ size }) => {
             isNoData={isNoData}
             menuItems={menuItems}
         >
+            {/* @ts-ignore */}
             <PieChart
                 dataSource={data?.dataPoints}
                 palette="Pastel"
                 title={`$${formatCurrency(data?.total ?? 0)} total`}
                 legend={{ visible: !isMobile }}
             >
+                {/* @ts-ignore */}
                 <Series argumentField="name" valueField="amount">
+                    {/* @ts-ignore */}
                     <Label visible={true} customizeText={customizeText}>
+                        {/* @ts-ignore */}
                         <Connector visible={true} width={1} />
                     </Label>
                 </Series>
+                {/* @ts-ignore */}
                 <Size height={175} />
             </PieChart>
         </DashboardElement>

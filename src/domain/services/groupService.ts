@@ -150,8 +150,10 @@ const getJoinedGroups = async (user_id?: string) => {
 
     const { data: memberData, error: memberError } = await supabaseClient
         .from<GroupMemberWithGroup>(GroupMembersTable)
-        .select('*, group:group_id (*, user:owner_id (*))')
-        .match({ user_id, is_owner: false });
+        .select('*, group:group_id (*, user:owner_id (*)), groups!inner(*)')
+        .match({ user_id, is_owner: false })
+        // @ts-ignore
+        .gte('groups.due_date', new Date().toISOString());
 
     if (memberError) throw memberError.message;
 

@@ -79,6 +79,7 @@ const RegistrationWrapper: FC = ({ children }) => {
             >
                 <RegisterForm
                     onFormSubmit={handleSubmit(handleFormSubmit)}
+                    //@ts-ignore
                     onFieldRegister={register}
                     formErrors={formErrors}
                     loading={createMutation.isLoading}

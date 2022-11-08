@@ -163,6 +163,51 @@ const GiftForm: FC<GiftFormProps> = ({
                     )}
                 />
             </Grid>
+            {gift && (
+                <Grid item xs={12} md={6}>
+                    <Controller
+                        name="is_archived"
+                        control={control}
+                        defaultValue={isAddMode ? false : gift!.is_archived}
+                        render={({ field }) => (
+                            <FormControl
+                                component="fieldset"
+                                error={!!formErrors.is_archived}
+                                fullWidth
+                            >
+                                <FormLabel component="legend">
+                                    archive gift
+                                </FormLabel>
+                                <RadioGroup
+                                    {...field}
+                                    onChange={e =>
+                                        field.onChange(
+                                            transformStringOutputToBoolean(e),
+                                        )
+                                    }
+                                    value={transformBooleanInputToString(
+                                        field.value,
+                                    )}
+                                >
+                                    <FormControlLabel
+                                        value="true"
+                                        control={<Radio />}
+                                        label="yes"
+                                    />
+                                    <FormControlLabel
+                                        value="false"
+                                        control={<Radio />}
+                                        label="no"
+                                    />
+                                </RadioGroup>
+                                <FormHelperText>
+                                    {formErrors.is_archived?.message}
+                                </FormHelperText>
+                            </FormControl>
+                        )}
+                    />
+                </Grid>
+            )}
             <Grid item xs={12}>
                 <LoadableButton
                     type="submit"

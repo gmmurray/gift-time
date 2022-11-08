@@ -95,8 +95,7 @@ const DashboardElement: FC<DashboardElementProps> = ({
             );
         else return children;
     };
-    const menuEnabled =
-        !isLoading && !isNoData && menuItems && menuItems.length > 0;
+    const menuEnabled = !isLoading && menuItems && menuItems.length > 0;
     return (
         <Grid item xs={12} md={size} columnSpacing={3}>
             <Paper elevation={2} sx={{ height: ROW_HEIGHTS[row], p: 2 }}>

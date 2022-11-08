@@ -113,6 +113,7 @@ const ViewGift = () => {
             <PageTitle>update gift</PageTitle>
             <GiftForm
                 onFormSubmit={handleSubmit(handleFormSubmit)}
+                // @ts-ignore
                 onRegister={register}
                 control={control}
                 formErrors={formErrors}

@@ -12,7 +12,7 @@ import {
 } from '../../../domain/services/groupService';
 import { useNavigate, useParams } from 'react-router';
 
-import { Auth } from '@supabase/ui';
+import { Auth } from '@supabase/ui'; // @ts-ignore
 import ConfirmationDialog from '../../../components/shared/ConfirmationDialog';
 import DataError from '../../../components/shared/DataError';
 import DataLoadingSpinner from '../../../components/shared/DataLoadingSpinner';
@@ -116,6 +116,7 @@ const GroupTab = () => {
             </Typography>
             <GroupForm
                 onFormSubmit={handleSubmit(handleFormSubmit)}
+                // @ts-ignore
                 onRegister={register}
                 control={control as Control<FieldValues, object>}
                 formErrors={formErrors}

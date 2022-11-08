@@ -15,6 +15,7 @@ export interface Gift extends DbEntity {
     price: number;
     web_link: string;
     is_private: boolean;
+    is_archived: boolean;
     priority: PriorityTypeEnum;
 }
 

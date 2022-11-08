@@ -9,6 +9,7 @@ const AlertProvider: FC = ({ children }) => {
         [alertStackRef],
     );
     return (
+        // @ts-ignore
         <SnackbarProvider
             ref={alertStackRef}
             action={key => (

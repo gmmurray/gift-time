@@ -34,8 +34,10 @@ export const getGroupMembersByUser = async (user_id?: string) => {
     if (!user_id) return [];
     const { data, error } = await supabaseClient
         .from<GroupMemberWithGroup>(GroupMembersTable)
-        .select('*, group:group_id(*)')
-        .match({ user_id });
+        .select('*, group:group_id(*), groups!inner(*)')
+        .match({ user_id })
+        //@ts-ignore
+        .gte('groups.due_date', new Date().toISOString());
 
     if (error) throw error.message;
 
@@ -118,8 +120,10 @@ export const getUpcomingGroupMembers = async (
 
     const { data, error } = await supabaseClient
         .from<GroupMemberWithGroup>(GroupMembersTable)
-        .select('*, group:group_id(*)')
+        .select('*, group:group_id(*), groups!inner(due_date)')
         .match({ user_id })
+        // @ts-ignore
+        .gte('groups.due_date', new Date().toISOString())
         // @ts-ignore
         .order('due_date', { foreignTable: 'groups', ascending: false })
         .limit(limit ?? 25);

@@ -1,4 +1,3 @@
-import { Location, State } from 'history';
 import { Navigate, RouteObject } from 'react-router';
 
 import ClaimedGifts from '../../pages/gifts/claimed/ClaimedGifts';
@@ -10,6 +9,7 @@ import InvitedGroups from '../../pages/groups/invited/InvitedGroups';
 import JoinedGroups from '../../pages/groups/joined/JoinedGroups';
 import LandingPage from '../../pages/landingPage/LandingPage';
 import Layout from '../../components/layout/Layout';
+import { Location } from 'history';
 import Login from '../../pages/login/Login';
 import NewGift from '../../pages/gifts/new/NewGift';
 import NewGroup from '../../pages/groups/new/NewGroup';
@@ -25,7 +25,7 @@ const elementWithLayout = (element: ReactElement) => <Layout>{element}</Layout>;
 
 const privateElement = (
     isAuthenticated: boolean,
-    location: Location<State>,
+    location: Location,
     element: ReactElement,
 ) => {
     if (!isAuthenticated)
@@ -36,7 +36,7 @@ const privateElement = (
 
 const nestedPrivateElement = (
     isAuthenticated: boolean,
-    location: Location<State>,
+    location: Location,
     element: ReactElement,
 ) => {
     if (!isAuthenticated)
@@ -51,7 +51,7 @@ const publicOnlyElement = (isAuthenticated: boolean, element: ReactElement) => {
 
 export const getRoutes = (
     isAuthenticated: boolean,
-    location: Location<State>,
+    location: Location,
 ): RouteObject[] => {
     const showPrivateElement = (element: ReactElement) =>
         privateElement(isAuthenticated, location, element);

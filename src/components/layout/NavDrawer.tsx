@@ -123,6 +123,7 @@ const NavDrawer = () => {
     );
 
     return (
+        // @ts-ignore
         <SwipeableDrawer
             disableBackdropTransition={!iOS}
             disableDiscovery={iOS}

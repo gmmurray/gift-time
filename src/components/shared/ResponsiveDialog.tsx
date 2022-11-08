@@ -17,6 +17,7 @@ const Transition = forwardRef(function Transition(
     props: TransitionProps & { children?: ReactElement<any, any> },
     ref: Ref<unknown>,
 ) {
+    // @ts-ignore
     return <Slide direction="left" ref={ref} {...props} />;
 });
 

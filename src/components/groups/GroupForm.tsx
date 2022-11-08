@@ -5,10 +5,10 @@ import {
     FieldValues,
     UseFormRegister,
 } from 'react-hook-form';
-import { DatePicker, LocalizationProvider } from '@mui/lab';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { Grid, TextField, Typography } from '@mui/material';
 
-import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { FC } from 'react';
 import { Group } from '../../domain/entities/Group';
 import LoadableButton from '../shared/LoadableButton';
@@ -61,10 +61,7 @@ const GroupForm: FC<GroupFormProps> = ({
                     control={control}
                     defaultValue={isAddMode ? new Date() : group?.due_date}
                     render={({ field }) => (
-                        <LocalizationProvider
-                            // @ts-ignore
-                            dateAdapter={AdapterDateFns}
-                        >
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
                             <DatePicker
                                 label="due date*"
                                 inputFormat="MM/dd/yyy"
@@ -74,7 +71,7 @@ const GroupForm: FC<GroupFormProps> = ({
                                         ? field.value
                                         : parseISO(field.value as any)
                                 }
-                                renderInput={props => (
+                                renderInput={(props: any) => (
                                     <TextField
                                         {...props}
                                         error={!!formErrors.due_date}

@@ -57,7 +57,7 @@ export const getAllGiftsInGroups = async (
         .from<Gift>(GiftsTable)
         .select('*, claimed_by:claimed_gift_id(*)')
         .in('user_id', otherUserIds)
-        .match({ is_private: false });
+        .match({ is_private: false, is_archived: false });
 
     if (error) throw error.message;
 
@@ -88,7 +88,11 @@ const getPriorityGifts = async (user_id?: string) => {
         .from<GiftWithUser>(GiftsTable)
         .select('*, user:user_id (*)')
         .in('user_id', otherUserIds)
-        .match({ is_private: false, priority: PriorityTypeEnum.high })
+        .match({
+            is_private: false,
+            priority: PriorityTypeEnum.high,
+            is_archived: false,
+        })
         .limit(5)
         .order('created_at', { ascending: false });
 
@@ -125,7 +129,7 @@ const getOwnSingleGift = async (gift_id?: number, user_id?: string) => {
     const { data, error } = await supabaseClient
         .from<Gift>(GiftsTable)
         .select(
-            'gift_id, created_at, user_id, name, description, price, web_link, priority, is_private',
+            'gift_id, created_at, user_id, name, description, price, web_link, priority, is_private, is_archived',
         )
         .match({ user_id, gift_id })
         .single();
@@ -152,7 +156,7 @@ const getOwnGifts = async (user_id?: string, is_private?: boolean) => {
     const { data, error } = await supabaseClient
         .from<Gift>(GiftsTable)
         .select(
-            'gift_id, created_at, user_id, name, description, price, web_link, priority, is_private',
+            'gift_id, created_at, user_id, name, description, price, web_link, priority, is_private, is_archived',
         )
         .match({ user_id, is_private });
 
@@ -178,7 +182,7 @@ export const getGroupGifts = async (member_ids: string[], user_id?: string) => {
         .select(
             '*, claimed_by:claimed_gift_id(*, claimed_by_user:claimed_by (*))',
         )
-        .match({ is_private: false })
+        .match({ is_private: false, is_archived: false })
         .not('user_id', 'eq', user_id)
         .in('user_id', member_ids);
 
