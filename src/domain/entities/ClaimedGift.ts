@@ -18,3 +18,5 @@ export interface ClaimedGiftWithUser extends ClaimedGift {
 export interface ClaimedGiftWithGift extends ClaimedGift {
     gift: GiftWithUser;
 }
+
+export const DEFAULT_CLAIMED_GIFT_DISPLAY_MONTHS = 6;

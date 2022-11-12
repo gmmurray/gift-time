@@ -1,9 +1,13 @@
+import {
+    ClaimedGiftWithGift,
+    DEFAULT_CLAIMED_GIFT_DISPLAY_MONTHS,
+} from '../entities/ClaimedGift';
 import { SpendingRange, UserSpending } from '../../lib/types/UserSpending';
 import { useMutation, useQuery } from 'react-query';
 
-import { ClaimedGiftWithGift } from '../entities/ClaimedGift';
 import { StatusTypeEnum } from '../../lib/types/StatusTypeEnum';
 import { defaultQueryCacheTime } from '../../lib/constants/defaultQueryCacheTime';
+import { getDateMonthsAgo } from '../../utils/helpers/dateHelpers';
 import { getDateRange } from '../../utils/helpers/dateRange';
 import { groupQueryKeys } from './groupService';
 import { queryClient } from '../../utils/config/queryClient';
@@ -22,8 +26,8 @@ export const claimedGiftQueryKeys = {
     userSpending: (range: SpendingRange, user_id?: string) => [
         ...claimedGiftQueryKeys.list('user-spending', range, user_id),
     ],
-    userClaimed: (user_id?: string) => [
-        ...claimedGiftQueryKeys.list('user-claimed', user_id),
+    userClaimed: (user_id?: string, showRecentOnly?: boolean) => [
+        ...claimedGiftQueryKeys.list('user-claimed', user_id, showRecentOnly),
     ],
     details: () => [...claimedGiftQueryKeys.all, 'detail'] as const,
     detail: (id?: number) => [...claimedGiftQueryKeys.details(), id] as const,
@@ -98,23 +102,36 @@ export const useGetUserSpending = (range: SpendingRange, user_id?: string) =>
         },
     );
 
-const getUserClaimed = async (user_id?: string) => {
+const getUserClaimed = async (user_id?: string, showRecentOnly = false) => {
     if (!user_id) return [];
 
-    const { data, error } = await supabaseClient
+    let q = supabaseClient
         .from<ClaimedGiftWithGift>(ClaimedGiftsTable)
-        .select('*, gift:gift_id (*, user:user_id(*))')
+        .select('*, gift:gift_id (*, user:user_id(*))');
+
+    if (showRecentOnly) {
+        q = q.filter(
+            'modified_at',
+            'gt',
+            getDateMonthsAgo(
+                DEFAULT_CLAIMED_GIFT_DISPLAY_MONTHS,
+                new Date(),
+            ).toISOString(),
+        );
+    }
+
+    const { data, error } = await q
         .match({ claimed_by: user_id })
         .order('modified_at', { ascending: true });
 
     if (error) throw error.message;
 
-    return data ?? [];
+    return (data ?? []).filter(gift => !gift.gift.is_archived);
 };
-export const useGetUserClaimed = (user_id?: string) =>
+export const useGetUserClaimed = (user_id?: string, showRecentOnly?: boolean) =>
     useQuery(
-        claimedGiftQueryKeys.userClaimed(user_id),
-        () => getUserClaimed(user_id),
+        claimedGiftQueryKeys.userClaimed(user_id, showRecentOnly),
+        () => getUserClaimed(user_id, showRecentOnly),
         {
             staleTime: defaultQueryCacheTime,
             enabled: !!user_id,

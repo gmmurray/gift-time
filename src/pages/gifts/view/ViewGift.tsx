@@ -71,7 +71,7 @@ const ViewGift = () => {
     );
 
     const handleDelete = useCallback(() => {
-        if (!resolvedGiftId) return;
+        if (!resolvedGiftId || !data || !!data.claimed_by) return;
         deleteMutation.mutate(
             { gift_id: resolvedGiftId, user_id: user?.id },
             {
@@ -86,7 +86,14 @@ const ViewGift = () => {
                     ),
             },
         );
-    }, [deleteMutation, enqueueSnackbar, resolvedGiftId, navigate, user]);
+    }, [
+        resolvedGiftId,
+        data,
+        deleteMutation,
+        user?.id,
+        enqueueSnackbar,
+        navigate,
+    ]);
 
     useEffect(() => {
         if (data) {

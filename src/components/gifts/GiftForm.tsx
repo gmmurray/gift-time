@@ -19,13 +19,14 @@ import {
     Select,
     TextField,
 } from '@mui/material';
+import { Gift, GiftWithClaim } from '../../domain/entities/Gift';
 import {
     transformBooleanInputToString,
     transformStringOutputToBoolean,
 } from '../../utils/helpers/formTransform';
 
+import ConditionalTooltip from '../shared/ConditionalTooltip';
 import { FC } from 'react';
-import { Gift } from '../../domain/entities/Gift';
 import LoadableButton from '../shared/LoadableButton';
 import { PriorityType } from '../../lib/constants/priorityTypes';
 
@@ -40,7 +41,7 @@ type GiftFormProps = {
     deleteLoading?: boolean;
     isAddMode: boolean;
     onDelete?: () => any;
-    gift?: Gift;
+    gift?: GiftWithClaim;
 };
 
 const GiftForm: FC<GiftFormProps> = ({
@@ -218,13 +219,21 @@ const GiftForm: FC<GiftFormProps> = ({
                     save
                 </LoadableButton>
                 {!isAddMode && (
-                    <LoadableButton
-                        sx={{ ml: 2 }}
-                        loading={!!deleteLoading}
-                        onClick={onDelete}
+                    <ConditionalTooltip
+                        title="Cannot delete gift since it is part of one of your groups"
+                        visible={!!gift && !!gift.claimed_by}
                     >
-                        delete
-                    </LoadableButton>
+                        <span>
+                            <LoadableButton
+                                sx={{ ml: 2 }}
+                                loading={!!deleteLoading}
+                                onClick={onDelete}
+                                disabled={gift && !!gift.claimed_by}
+                            >
+                                delete
+                            </LoadableButton>
+                        </span>
+                    </ConditionalTooltip>
                 )}
             </Grid>
         </Grid>

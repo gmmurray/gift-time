@@ -2,6 +2,7 @@ import * as groupMemberService from './groupMemberService';
 
 import {
     Gift,
+    GiftWithClaim,
     GiftWithClaimUser,
     GiftWithGroupMembers,
     GiftWithUser,
@@ -25,8 +26,8 @@ export const giftQueryKeys = {
         [...giftQueryKeys.list('priority', user_id)] as const,
     ownSingle: (gift_id?: number, user_id?: string) =>
         [...giftQueryKeys.list('own-single', gift_id, user_id)] as const,
-    own: (is_private?: boolean, user_id?: string) => [
-        ...giftQueryKeys.list('own', is_private, user_id),
+    own: (is_private?: boolean, user_id?: string, showArchived?: boolean) => [
+        ...giftQueryKeys.list('own', is_private, user_id, showArchived),
     ],
     details: () => [...giftQueryKeys.all, 'detail'] as const,
     detail: (id?: number) => [...giftQueryKeys.details(), id] as const,
@@ -127,9 +128,9 @@ const getOwnSingleGift = async (gift_id?: number, user_id?: string) => {
     if (!user_id || !gift_id) return null;
 
     const { data, error } = await supabaseClient
-        .from<Gift>(GiftsTable)
+        .from<GiftWithClaim>(GiftsTable)
         .select(
-            'gift_id, created_at, user_id, name, description, price, web_link, priority, is_private, is_archived',
+            'gift_id, created_at, user_id, name, description, price, web_link, priority, is_private, is_archived, claimed_by:claimed_gift_id',
         )
         .match({ user_id, gift_id })
         .single();
@@ -150,25 +151,41 @@ export const useGetOwnSingleGift = (gift_id?: number, user_id?: string) =>
         },
     );
 
-const getOwnGifts = async (user_id?: string, is_private?: boolean) => {
+const getOwnGifts = async (
+    user_id?: string,
+    is_private?: boolean,
+    showArchived: boolean = true,
+) => {
     if (!user_id) return [];
 
-    const { data, error } = await supabaseClient
+    let q = supabaseClient
         .from<Gift>(GiftsTable)
         .select(
             'gift_id, created_at, user_id, name, description, price, web_link, priority, is_private, is_archived',
-        )
-        .match({ user_id, is_private });
+        );
+
+    if (!showArchived) {
+        q = q.eq('is_archived', false);
+    }
+
+    const { data, error } = await q.match({
+        user_id,
+        is_private,
+    });
 
     if (error) throw error.message;
 
     return data ?? [];
 };
 
-export const useGetOwnGifts = (user_id?: string, is_private?: boolean) =>
+export const useGetOwnGifts = (
+    user_id?: string,
+    is_private?: boolean,
+    showArchived?: boolean,
+) =>
     useQuery(
-        giftQueryKeys.own(is_private, user_id),
-        () => getOwnGifts(user_id, is_private),
+        giftQueryKeys.own(is_private, user_id, showArchived),
+        () => getOwnGifts(user_id, is_private, showArchived),
         {
             enabled: !!user_id,
             retry: 2,
@@ -220,7 +237,8 @@ export const useCreateGift = () =>
 //#endregion
 
 //#region update
-const updateGift = async (gift: Gift) => {
+const updateGift = async (gift: GiftWithClaim) => {
+    delete gift.claimed_by;
     const { data, error } = await supabaseClient
         .from<Gift>(GiftsTable)
         .upsert(gift)

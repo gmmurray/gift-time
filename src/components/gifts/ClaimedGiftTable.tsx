@@ -1,8 +1,12 @@
+import { Box, FormControlLabel, Switch } from '@mui/material';
+import {
+    ClaimedGiftWithGift,
+    DEFAULT_CLAIMED_GIFT_DISPLAY_MONTHS,
+} from '../../domain/entities/ClaimedGift';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { FC, useState } from 'react';
 
 import BasicPaperContainer from '../shared/BasicPaperContainer';
-import { ClaimedGiftWithGift } from '../../domain/entities/ClaimedGift';
 import PageTitle from '../shared/PageTitle';
 import { PriorityTypeEnum } from '../../lib/constants/priorityTypes';
 import { StatusTypeEnum } from '../../lib/types/StatusTypeEnum';
@@ -58,24 +62,23 @@ type ClaimedGiftTableProps = {
     title: string;
     data: ClaimedGiftWithGift[] | undefined;
     isLoading: boolean;
+    showRecentOnly: boolean;
+    onRecentOnlyToggle: () => any;
 };
 
 const ClaimedGiftTable: FC<ClaimedGiftTableProps> = ({
     title,
     data,
     isLoading,
+    showRecentOnly,
+    onRecentOnlyToggle,
 }) => {
     const [pageSize, setPageSize] = useState(5);
     const tableRows = (data ?? []).map(
         ({
             claimed_gift_id,
             status_id,
-            gift: {
-                name,
-                price,
-                priority,
-                user: { display_name },
-            },
+            gift: { name, price, priority, user: { display_name } = {} } = {},
         }) => ({
             id: claimed_gift_id,
             name,
@@ -89,6 +92,17 @@ const ClaimedGiftTable: FC<ClaimedGiftTableProps> = ({
     return (
         <BasicPaperContainer>
             <PageTitle>{title}</PageTitle>
+            <Box>
+                <FormControlLabel
+                    label={`Only show gifts from the last ${DEFAULT_CLAIMED_GIFT_DISPLAY_MONTHS} months`}
+                    control={
+                        <Switch
+                            checked={showRecentOnly}
+                            onChange={onRecentOnlyToggle}
+                        />
+                    }
+                />
+            </Box>
             <DataGrid
                 autoHeight
                 rows={tableRows}

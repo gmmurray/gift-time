@@ -1,3 +1,4 @@
+import { Box, FormControlLabel, Switch } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { FC, useCallback, useState } from 'react';
 import { NavigateFunction, useNavigate } from 'react-router';
@@ -65,9 +66,17 @@ type GiftTableProps = {
     title: string;
     data: Gift[] | undefined;
     isLoading: boolean;
+    showArchived?: boolean;
+    onShowArchivedToggle?: () => any;
 };
 
-const GiftTable: FC<GiftTableProps> = ({ title, data, isLoading }) => {
+const GiftTable: FC<GiftTableProps> = ({
+    title,
+    data,
+    isLoading,
+    showArchived = true,
+    onShowArchivedToggle,
+}) => {
     const [pageSize, setPageSize] = useState(5);
     const navigate = useNavigate();
 
@@ -88,6 +97,19 @@ const GiftTable: FC<GiftTableProps> = ({ title, data, isLoading }) => {
     return (
         <BasicPaperContainer>
             <PageTitle>{title}</PageTitle>
+            {!!onShowArchivedToggle && (
+                <Box>
+                    <FormControlLabel
+                        label="Show archived items"
+                        control={
+                            <Switch
+                                checked={showArchived}
+                                onChange={onShowArchivedToggle}
+                            />
+                        }
+                    />
+                </Box>
+            )}
             <DataGrid
                 autoHeight
                 rows={tableRows}
