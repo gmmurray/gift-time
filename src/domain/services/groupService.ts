@@ -23,10 +23,10 @@ export const groupQueryKeys = {
         [...groupQueryKeys.lists(), { name, ...args }] as const,
     query: (...args: any[]) =>
         [...groupQueryKeys.lists(), { ...args }] as const,
-    owned: (owner_id?: string) =>
-        [...groupQueryKeys.list('owned', owner_id)] as const,
-    joined: (user_id?: string) =>
-        [...groupQueryKeys.list('joined', user_id)] as const,
+    owned: (owner_id?: string, showExpiredGroups?: boolean) =>
+        [...groupQueryKeys.list('owned', owner_id, showExpiredGroups)] as const,
+    joined: (user_id?: string, showExpiredGroups?: boolean) =>
+        [...groupQueryKeys.list('joined', user_id, showExpiredGroups)] as const,
     groupGift: (group_id?: number) =>
         [...groupQueryKeys.list('group-gift', group_id)] as const,
     upcoming: (user_id?: string) =>
@@ -62,12 +62,19 @@ export const useGetGroup = (group_id: number, owner_id?: string) =>
         },
     );
 
-const getOwnedGroups = async (owner_id?: string) => {
+const getOwnedGroups = async (
+    owner_id?: string,
+    showExpiredGroups: boolean = false,
+) => {
     if (!owner_id) return;
-    const groups = await supabaseClient
-        .from<Group>(GroupsTable)
-        .select()
-        .match({ owner_id });
+
+    let query = supabaseClient.from<Group>(GroupsTable).select();
+
+    if (!showExpiredGroups) {
+        query = query.gt('due_date', new Date().toISOString());
+    }
+
+    const groups = await query.match({ owner_id });
 
     if (groups.error) throw groups.error.message;
 
@@ -126,11 +133,18 @@ const getOwnedGroups = async (owner_id?: string) => {
     }));
 };
 
-export const useGetOwnedGroups = (owner_id?: string) =>
-    useQuery(groupQueryKeys.owned(owner_id), () => getOwnedGroups(owner_id), {
-        staleTime: defaultQueryCacheTime,
-        enabled: !!owner_id,
-    });
+export const useGetOwnedGroups = (
+    owner_id?: string,
+    showExpiredGroups?: boolean,
+) =>
+    useQuery(
+        groupQueryKeys.owned(owner_id, showExpiredGroups),
+        () => getOwnedGroups(owner_id, showExpiredGroups),
+        {
+            staleTime: defaultQueryCacheTime,
+            enabled: !!owner_id,
+        },
+    );
 
 const getJoinedGroup = async (group_id?: number, user_id?: string) => {
     if (!group_id || !user_id) return null;
@@ -145,15 +159,22 @@ const getJoinedGroup = async (group_id?: number, user_id?: string) => {
     return data;
 };
 
-const getJoinedGroups = async (user_id?: string) => {
+const getJoinedGroups = async (user_id?: string, showExpiredGroups = false) => {
     if (!user_id) return [];
 
-    const { data: memberData, error: memberError } = await supabaseClient
+    let query = supabaseClient
         .from<GroupMemberWithGroup>(GroupMembersTable)
-        .select('*, group:group_id (*, user:owner_id (*)), groups!inner(*)')
-        .match({ user_id, is_owner: false })
+        .select('*, group:group_id (*, user:owner_id (*)), groups!inner(*)');
+
+    if (!showExpiredGroups) {
         // @ts-ignore
-        .gte('groups.due_date', new Date().toISOString());
+        query = query.gte('groups.due_date', new Date().toISOString());
+    }
+
+    const { data: memberData, error: memberError } = await query.match({
+        user_id,
+        is_owner: false,
+    });
 
     if (memberError) throw memberError.message;
 
@@ -162,11 +183,18 @@ const getJoinedGroups = async (user_id?: string) => {
     return memberData.map(m => m.group);
 };
 
-export const useGetJoinedGroups = (user_id?: string) =>
-    useQuery(groupQueryKeys.joined(user_id), () => getJoinedGroups(user_id), {
-        staleTime: defaultQueryCacheTime,
-        enabled: !!user_id,
-    });
+export const useGetJoinedGroups = (
+    user_id?: string,
+    showExpiredGroups?: boolean,
+) =>
+    useQuery(
+        groupQueryKeys.joined(user_id, showExpiredGroups),
+        () => getJoinedGroups(user_id, showExpiredGroups),
+        {
+            staleTime: defaultQueryCacheTime,
+            enabled: !!user_id,
+        },
+    );
 
 const getGroupGift = async (group_id?: number, user_id?: string) => {
     if (!group_id || !user_id) return null;

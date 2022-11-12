@@ -1,4 +1,4 @@
-import { Avatar, Tooltip } from '@mui/material';
+import { Avatar, Box, FormControlLabel, Switch, Tooltip } from '@mui/material';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { NavigateFunction, useNavigate } from 'react-router';
 import { useCallback, useState } from 'react';
@@ -55,7 +55,8 @@ const getTableCols = (navigate: NavigateFunction): GridColDef[] => [
 
 const JoinedGroups = () => {
     const { user } = Auth.useUser();
-    const { data, isLoading } = useGetJoinedGroups(user?.id);
+    const [showExpiredGroups, setShowExpiredGroups] = useState(false);
+    const { data, isLoading } = useGetJoinedGroups(user?.id, showExpiredGroups);
     const [pageSize, setPageSize] = useState(5);
     const onPageSizeChange = useCallback(
         (newPageSize: number) => setPageSize(newPageSize),
@@ -66,6 +67,11 @@ const JoinedGroups = () => {
     const getColumnDefinitions = useCallback(
         () => getTableCols(navigate),
         [navigate],
+    );
+
+    const handleShowExpiredToggle = useCallback(
+        () => setShowExpiredGroups(state => !state),
+        [],
     );
 
     const tableRows = (data ?? []).map(g => ({
@@ -79,6 +85,17 @@ const JoinedGroups = () => {
     return (
         <BasicPaperContainer>
             <PageTitle>joined groups</PageTitle>
+            <Box>
+                <FormControlLabel
+                    label="Show expired"
+                    control={
+                        <Switch
+                            checked={showExpiredGroups}
+                            onChange={handleShowExpiredToggle}
+                        />
+                    }
+                />
+            </Box>
             <DataGrid
                 autoHeight
                 rows={tableRows}
